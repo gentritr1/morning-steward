@@ -1,0 +1,2490 @@
+{
+  "schemaVersion": 1,
+  "startsOn": "2026-08-29",
+  "cadence": "daily",
+  "lessons": [
+    {
+      "id": "ram-and-storage",
+      "dayOffset": 0,
+      "title": "RAM is your desk. Storage is your cabinet.",
+      "deck": "Two kinds of space, two very different jobs.",
+      "readMinutes": 4,
+      "summary": "RAM holds what your Mac is actively working with; storage keeps things after the work is done. A crowded desk can slow you down even when the filing cabinet still has room, and an overfilled cabinet can leave the desk without a safe overflow area.",
+      "concepts": [
+        {
+          "term": "RAM",
+          "analogy": "Your desk",
+          "definition": "Fast, temporary memory used by apps and the system while they are running.",
+          "example": "Open browser tabs, a design canvas, and the current video timeline all need room in RAM."
+        },
+        {
+          "term": "Storage",
+          "analogy": "Your filing cabinet",
+          "definition": "Long-term space on the SSD where apps, documents, photos, and system files remain.",
+          "example": "A project stays on the SSD after you close its app or restart the Mac."
+        },
+        {
+          "term": "Working set",
+          "analogy": "Everything spread across the desk right now",
+          "definition": "The parts of open apps and files that the Mac needs to reach quickly at this moment.",
+          "example": "Switching from browsing to editing video usually makes the working set much larger."
+        }
+      ],
+      "misconception": "Adding more storage does not add more RAM. Free SSD space can help the Mac use swap safely, but RAM and storage remain separate resources.",
+      "takeaway": "RAM is space for now; storage is space for later. Check which one is under pressure before deciding what to close or clean.",
+      "interaction": {
+        "kind": "workbench-simulation",
+        "title": "Set your workbench",
+        "prompt": "Choose a workload and watch the active desk fill up.",
+        "unit": "working-set points",
+        "presets": [
+          {
+            "id": "browser",
+            "label": "Browser",
+            "value": 4
+          },
+          {
+            "id": "design",
+            "label": "Design",
+            "value": 7
+          },
+          {
+            "id": "video",
+            "label": "Video",
+            "value": 11
+          }
+        ]
+      }
+    },
+    {
+      "id": "memory-pressure-and-swap",
+      "dayOffset": 1,
+      "title": "When the desk gets crowded",
+      "deck": "Memory pressure tells the fuller story; swap is the overflow plan.",
+      "readMinutes": 4,
+      "summary": "A low free-RAM number is not automatically bad. macOS intentionally uses available memory to work faster. Memory pressure combines several signals to show whether the system is coping comfortably or spending extra effort making room.",
+      "concepts": [
+        {
+          "term": "Memory pressure",
+          "analogy": "A traffic light for the desk",
+          "definition": "A combined measure of how easily the Mac can meet current memory demand.",
+          "example": "Green means the system is coping; sustained yellow or red suggests the active workload is too heavy."
+        },
+        {
+          "term": "Swap",
+          "analogy": "An overflow box beside the desk",
+          "definition": "SSD space temporarily used when active work cannot fit comfortably in RAM.",
+          "example": "A background app may be moved to swap while a large edit stays ready in faster RAM."
+        },
+        {
+          "term": "Memory compression",
+          "analogy": "Vacuum-packing papers before using another box",
+          "definition": "A technique that packs inactive memory more tightly so more can remain in RAM.",
+          "example": "The Mac may compress background app data before it begins swapping heavily."
+        }
+      ],
+      "misconception": "Completely empty RAM is not the goal. The system uses spare RAM for useful work and cached data, then reclaims it when an app needs space.",
+      "takeaway": "Watch sustained memory pressure and heavy swap—not free RAM by itself—when judging whether memory is the bottleneck."
+    },
+    {
+      "id": "files-and-bytes",
+      "dayOffset": 2,
+      "title": "How a file becomes a number",
+      "deck": "Bytes measure content, while units and metadata explain why totals can differ.",
+      "readMinutes": 4,
+      "summary": "Every file is stored as bytes, but the number you see depends on how those bytes are counted and presented. Learning the units makes storage reports easier to compare without treating a harmless rounding difference as a mystery.",
+      "concepts": [
+        {
+          "term": "Byte",
+          "analogy": "A tiny building block",
+          "definition": "A basic unit of digital storage, made from eight bits.",
+          "example": "A short text note needs thousands of bytes; a high-quality video may need billions."
+        },
+        {
+          "term": "GB and GiB",
+          "analogy": "Two measuring cups with slightly different marks",
+          "definition": "A gigabyte uses powers of 1,000; a gibibyte uses powers of 1,024.",
+          "example": "The same data can show a smaller number in GiB than in GB even though no bytes disappeared."
+        },
+        {
+          "term": "Metadata",
+          "analogy": "A luggage tag attached to the suitcase",
+          "definition": "Information about a file, such as its name, dates, permissions, and location.",
+          "example": "Two photos can contain similar pixels but have different dates, labels, and editing history."
+        }
+      ],
+      "misconception": "A storage tool showing a different total is not necessarily wrong; it may use different units, rounding, permissions, or rules for shared data.",
+      "takeaway": "Compare like with like: use the same units and the same scanning method when looking for real change."
+    },
+    {
+      "id": "caches-and-build-artifacts",
+      "dayOffset": 3,
+      "title": "The useful mess behind fast work",
+      "deck": "Caches and build artifacts save time, but their copies can quietly accumulate.",
+      "readMinutes": 5,
+      "summary": "Many large folders are not personal documents. Apps and developer tools create local shortcuts and generated outputs so work opens or builds faster. These files may be rebuildable, but removing them still has a cost: the next launch or build may be slower and may need a network connection.",
+      "concepts": [
+        {
+          "term": "Cache",
+          "analogy": "A shortcut drawer",
+          "definition": "A stored copy of data that an app expects to use again soon.",
+          "example": "A browser keeps image copies so a familiar page can load faster next time."
+        },
+        {
+          "term": "Build artifact",
+          "analogy": "The cut pieces left beside a workshop project",
+          "definition": "Generated output created while turning source files into a runnable app or other result.",
+          "example": "Compiled objects, simulator builds, and preview outputs can be regenerated from source."
+        },
+        {
+          "term": "Dependency copy",
+          "analogy": "Each workshop keeping its own toolbox",
+          "definition": "A local copy of third-party code or assets that a project needs to build.",
+          "example": "Several projects may each keep their own package folder even when versions overlap."
+        }
+      ],
+      "misconception": "Rebuildable does not mean worthless. Clearing a cache during active work can trade storage space for waiting, downloads, or a temporarily broken offline workflow.",
+      "takeaway": "Treat generated data as reviewable, not disposable: confirm its owner, rebuild path, and timing before clearing it."
+    },
+    {
+      "id": "apps-and-app-data",
+      "dayOffset": 4,
+      "title": "The app is only the front door",
+      "deck": "An application, its settings, and your content often live in separate places.",
+      "readMinutes": 4,
+      "summary": "Dragging an app into the Trash removes its main application bundle, but that may be only part of its footprint. Preferences, downloads, libraries, plug-ins, and project data can live elsewhere so they survive updates or reinstalls.",
+      "concepts": [
+        {
+          "term": "Application bundle",
+          "analogy": "The appliance itself",
+          "definition": "The packaged program that appears as one app in Finder.",
+          "example": "A creative app bundle contains its executable code, icons, and built-in resources."
+        },
+        {
+          "term": "Application Support",
+          "analogy": "The appliance's supply cupboard",
+          "definition": "Data an app keeps outside its bundle to support features and future launches.",
+          "example": "Downloaded models, templates, plug-ins, or content indexes may live there."
+        },
+        {
+          "term": "App container",
+          "analogy": "A labeled room with controlled doors",
+          "definition": "A sandboxed area where an app stores its settings, caches, and local files.",
+          "example": "Two apps can keep similarly named files separate because each has its own container."
+        }
+      ],
+      "misconception": "Deleting an app does not guarantee that every related file is removed, and deleting every related folder can also remove work you meant to keep.",
+      "takeaway": "Before removing an app, separate the program, its rebuildable support files, and your irreplaceable content."
+    },
+    {
+      "id": "apfs-purgeable-and-snapshots",
+      "dayOffset": 5,
+      "title": "Why free space can look slippery",
+      "deck": "APFS can share capacity, reserve recoverable space, and preserve moments in time.",
+      "readMinutes": 5,
+      "summary": "Modern Macs use APFS, which manages storage more flexibly than a row of fixed boxes. Several volumes can share one container, some data can be reclaimed when needed, and snapshots can preserve earlier filesystem states. That flexibility is useful, but it makes one simple free-space number incomplete.",
+      "concepts": [
+        {
+          "term": "APFS container",
+          "analogy": "A building whose rooms share the same land",
+          "definition": "A shared pool of disk capacity used by one or more APFS volumes.",
+          "example": "System and Data volumes can report separately while drawing space from the same container."
+        },
+        {
+          "term": "Purgeable space",
+          "analogy": "A guest room that can be cleared when family arrives",
+          "definition": "Locally stored data the system believes it can remove or download again when space is needed.",
+          "example": "Some cached or cloud-backed files may count as used now but remain recoverable later."
+        },
+        {
+          "term": "Snapshot",
+          "analogy": "A restore point in a time machine",
+          "definition": "A read-only record of the filesystem state at a particular moment.",
+          "example": "A local backup snapshot can help recover an earlier file version until the system releases it."
+        }
+      ],
+      "misconception": "Two free-space readings that differ do not automatically mean disk corruption; they may count shared, purgeable, or snapshot data differently.",
+      "takeaway": "Use free space as a trend, then inspect purgeable data and snapshots when the visible folders do not explain the total."
+    },
+    {
+      "id": "diagnosing-storage-growth",
+      "dayOffset": 6,
+      "title": "Find what changed, not only what is large",
+      "deck": "A baseline and a repeatable scan turn storage cleanup into diagnosis.",
+      "readMinutes": 5,
+      "summary": "The largest folder today may have been large for years. To explain a sudden drop in free space, compare measurements taken the same way over time, then follow the categories with the biggest increase. This turns a vague feeling into a testable story.",
+      "concepts": [
+        {
+          "term": "Baseline",
+          "analogy": "The first mark on a measuring tape",
+          "definition": "A trusted starting measurement used for later comparisons.",
+          "example": "Record available space each morning before asking which category grew."
+        },
+        {
+          "term": "Delta",
+          "analogy": "The distance between two marks",
+          "definition": "The amount a measurement changed between snapshots.",
+          "example": "If projects rose by 6 GB while free space fell by 7 GB, they are a strong lead—not yet proof."
+        },
+        {
+          "term": "Attribution coverage",
+          "analogy": "How much of the map has street names",
+          "definition": "The share of total change that a scan can explain with measured categories.",
+          "example": "Low coverage means the report should say 'unknown' instead of guessing at protected or unscanned areas."
+        }
+      ],
+      "misconception": "The biggest folder is not necessarily the cause of today's storage loss. Size answers 'what is large'; change answers 'what grew.'",
+      "takeaway": "Measure consistently, compare deltas, and keep uncertainty visible. Diagnosis comes before cleanup."
+    },
+    {
+      "id": "performance-is-not-one-number",
+      "dayOffset": 7,
+      "title": "Slow does not always mean busy",
+      "deck": "Performance has several dimensions, and each points to a different fix.",
+      "readMinutes": 4,
+      "summary": "An app can feel slow because it is waiting, doing too much work, or handling work in large bursts. Separating responsiveness, latency, and throughput makes a vague complaint easier to investigate without assuming that one number explains everything.",
+      "concepts": [
+        {
+          "term": "Responsiveness",
+          "analogy": "How quickly a shopkeeper looks up when you speak",
+          "definition": "How quickly a system reacts to an input and shows that it noticed you.",
+          "example": "A button feels responsive when it acknowledges a tap immediately, even if the full result takes longer."
+        },
+        {
+          "term": "Latency",
+          "analogy": "The travel time of a message",
+          "definition": "The delay between requesting an operation and receiving its result.",
+          "example": "A network request may have high latency when the server takes a noticeable moment to answer."
+        },
+        {
+          "term": "Throughput",
+          "analogy": "How many boxes a conveyor moves each minute",
+          "definition": "The amount of work a system completes in a given period.",
+          "example": "A build system has higher throughput when it can compile more files per minute."
+        }
+      ],
+      "misconception": "A faster average does not guarantee a better experience. Rare long pauses can make an app feel worse even when most operations are quick.",
+      "takeaway": "When something feels slow, ask whether the problem is reaction time, waiting time, or total work completed before choosing a fix."
+    },
+    {
+      "id": "backups-need-a-restore-path",
+      "dayOffset": 8,
+      "title": "A backup matters when it can come back",
+      "deck": "A second copy is useful only when you know how to restore it.",
+      "readMinutes": 4,
+      "summary": "Backups reduce the risk of losing important work, but a backup is not the same as a pile of old files. You need a separate copy, a clear history of versions, and a small restore check so you know the protection works before an emergency.",
+      "concepts": [
+        {
+          "term": "Backup",
+          "analogy": "A spare key kept somewhere safe",
+          "definition": "A separate copy of data that can be used after loss, damage, or an unwanted change.",
+          "example": "A project copy on an external drive can help after a laptop drive fails."
+        },
+        {
+          "term": "Version history",
+          "analogy": "A stack of dated drafts",
+          "definition": "Multiple preserved states of a file or project so you can recover an earlier version.",
+          "example": "Version history can recover yesterday's spreadsheet after today's mistaken edit."
+        },
+        {
+          "term": "Restore test",
+          "analogy": "Trying the spare key before the lockout",
+          "definition": "A small, deliberate check that confirms a backup can actually produce a usable file.",
+          "example": "Restore one ordinary document to a temporary folder and open it to verify the path works."
+        }
+      ],
+      "misconception": "A synced folder is not automatically a complete backup. A deletion or unwanted edit can synchronize too, and a backup you have never restored is an assumption rather than a tested recovery path.",
+      "takeaway": "Keep an independent copy, preserve useful versions, and test a small restore occasionally. Protection includes the return trip."
+    },
+    {
+      "id": "projects-need-a-source-of-truth",
+      "dayOffset": 9,
+      "title": "A project is more than its folder",
+      "deck": "Source files, generated outputs, and handoff notes each have a different job.",
+      "readMinutes": 4,
+      "summary": "Project hygiene is easier when you can tell what must be preserved, what can be rebuilt, and what another person or agent needs to continue. A tidy project is not merely small; it is understandable and recoverable.",
+      "concepts": [
+        {
+          "term": "Source of truth",
+          "analogy": "The recipe card everyone trusts",
+          "definition": "The canonical files and decisions used to explain or recreate a project.",
+          "example": "Source code, a lockfile, and a short README can tell you what to change and how to rebuild it."
+        },
+        {
+          "term": "Generated output",
+          "analogy": "Sawdust left by the workshop",
+          "definition": "Files produced from source material that can usually be recreated by a tool or build.",
+          "example": "An Android build folder can be regenerated from the project source and its dependencies."
+        },
+        {
+          "term": "Handoff note",
+          "analogy": "A note tied to the toolbox",
+          "definition": "A compact record of context, decisions, checks, and the next action for whoever continues the work.",
+          "example": "A handoff can name the changed files, the validation run, and the one open risk without copying the whole chat."
+        }
+      ],
+      "misconception": "A small or clean-looking project is not automatically healthy. Missing setup instructions, ignored files, or undocumented decisions can make it harder to rebuild than a larger but explicit project.",
+      "takeaway": "Preserve the source of truth, label rebuildable output, and leave a short handoff so the next session can start with context."
+    },
+    {
+      "id": "privacy-by-minimization",
+      "dayOffset": 10,
+      "title": "Private by keeping less",
+      "deck": "Useful notes can answer the next question without keeping the whole conversation.",
+      "readMinutes": 4,
+      "summary": "Privacy is often improved before data is stored. Decide what the task actually needs, remove identifying detail from what remains, and give retained information a clear lifetime. Aggregate trends can be useful without preserving the source text.",
+      "concepts": [
+        {
+          "term": "Data minimization",
+          "analogy": "Carrying only the keys you need today",
+          "definition": "Collecting and retaining only the information required for a specific purpose.",
+          "example": "A workflow report can keep category counts and time windows instead of raw prompts or message bodies."
+        },
+        {
+          "term": "Redaction",
+          "analogy": "Covering a name with an opaque marker",
+          "definition": "Removing or masking details that are not needed for the intended use.",
+          "example": "A diagnostic note can describe a permission error without including a personal path or secret token."
+        },
+        {
+          "term": "Retention window",
+          "analogy": "A library due date",
+          "definition": "The defined period for keeping information before it is rotated, deleted, or summarized.",
+          "example": "A dashboard may retain a short sequence of daily totals while discarding the raw observations."
+        }
+      ],
+      "misconception": "Calling data aggregated does not make every dataset safe. Rare combinations of dates, places, or events can still identify someone, so aggregation should remove unnecessary detail as well as names.",
+      "takeaway": "Start with the smallest useful record, strip identifying detail, and decide when the record should stop existing."
+    },
+    {
+      "id": "agent-work-leaves-a-trail",
+      "dayOffset": 11,
+      "title": "A good task leaves a trail",
+      "deck": "Clear context turns one session into a reusable handoff.",
+      "readMinutes": 4,
+      "summary": "A task is easier to resume when the important context is captured before it disappears into a long session. A useful handoff names the goal, the current state, the checks that ran, and the next step without copying the whole conversation.",
+      "concepts": [
+        {
+          "term": "Context packet",
+          "analogy": "A labeled parcel",
+          "definition": "A compact set of inputs, constraints, decisions, and current state needed to continue work.",
+          "example": "A context packet can name the project goal, changed files, validation command, and one unresolved risk."
+        },
+        {
+          "term": "Checkpoint",
+          "analogy": "A trail marker",
+          "definition": "A saved progress note made at a meaningful point so later work can restart from a known state.",
+          "example": "After a working build, record what changed and what remains before beginning a larger refactor."
+        },
+        {
+          "term": "Verification record",
+          "analogy": "A receipt",
+          "definition": "A short account of what was checked, how it was checked, and what result it produced.",
+          "example": "A verification record can say that validation passed while a visual review still needs a screenshot."
+        }
+      ],
+      "misconception": "A long transcript is not the same as usable context. Raw history can bury decisions, repeat stale assumptions, and retain details that the next task does not need.",
+      "takeaway": "Before ending a task, leave the goal, changed files, checks, open risk, and next step. A small clear trail is more useful than a copied conversation."
+    },
+    {
+      "id": "the-bottleneck-can-move",
+      "dayOffset": 12,
+      "title": "The bottleneck can move",
+      "deck": "A healthy diagnosis follows pressure between resources instead of trusting one number.",
+      "readMinutes": 4,
+      "summary": "An app can be limited by CPU, memory, storage, or the network, and the limiting resource can change as the workload changes. A short observation of what is waiting, what is busy, and what has headroom gives you a better next check than guessing from a single metric.",
+      "concepts": [
+        {
+          "term": "Bottleneck",
+          "analogy": "The narrowest part of a funnel",
+          "definition": "The resource or step that currently limits how quickly the whole system can progress.",
+          "example": "A build may have plenty of CPU available but still wait on a slow disk step."
+        },
+        {
+          "term": "Contention",
+          "analogy": "Several people sharing one checkout",
+          "definition": "Competition between tasks that need the same finite resource at the same time.",
+          "example": "A browser, video export, and backup can contend for storage bandwidth even when each task is reasonable alone."
+        },
+        {
+          "term": "Headroom",
+          "analogy": "Empty seats kept for the next group",
+          "definition": "Spare capacity that can absorb new demand before work starts queuing or failing.",
+          "example": "Free storage gives updates and temporary files room to complete without an emergency cleanup."
+        }
+      ],
+      "misconception": "Fixing the largest visible number does not always fix the symptom. Improving one resource can simply reveal the next bottleneck, so the workload and its waiting point still need checking.",
+      "takeaway": "Ask what is waiting, what is saturated, and what has headroom. Follow the bottleneck as the workload changes."
+    },
+    {
+      "id": "rebuildable-is-not-disposable",
+      "dayOffset": 13,
+      "title": "Rebuildable is not disposable",
+      "deck": "A safe cleanup decision includes ownership, timing, and a recovery path.",
+      "readMinutes": 4,
+      "summary": "Some files can be recreated, but that does not make every similarly named folder safe to remove. A careful cleanup identifies the exact allowlisted target, checks that the owner and rebuild path are understood, and stops when the permission boundary is unclear.",
+      "concepts": [
+        {
+          "term": "Allowlist",
+          "analogy": "A guest list at the door",
+          "definition": "An explicit set of paths or actions that a tool is permitted to handle.",
+          "example": "A cleanup routine may allow a Gradle cache while excluding application data and source projects."
+        },
+        {
+          "term": "Rebuild path",
+          "analogy": "The recipe for making a replacement part",
+          "definition": "The known steps and inputs needed to recreate generated data after it is removed.",
+          "example": "A project-local build folder can be recreated by running the documented build with its lockfile and dependencies."
+        },
+        {
+          "term": "Permission boundary",
+          "analogy": "A locked gate around a work area",
+          "definition": "The limit that determines whether a process may safely read, change, or remove a target.",
+          "example": "An operation-not-permitted error is a signal to stop and report the boundary rather than try a broader command."
+        }
+      ],
+      "misconception": "If a file looks generated, deleting it is automatically harmless. The name may hide important ownership, active work, or a missing recovery path.",
+      "takeaway": "Delete only an exact approved target with a known rebuild path. When the boundary is unclear, preserve the data and report the blocker."
+    },
+    {
+      "id": "the-next-check-should-be-testable",
+      "dayOffset": 14,
+      "title": "Make the next check testable",
+      "deck": "A useful handoff turns uncertainty into one observable next action.",
+      "readMinutes": 3,
+      "summary": "Tasks become easier to resume when the next step is concrete enough to verify. Instead of leaving a vague instruction such as investigate further, name the condition to inspect, the small check to run, and the result that would change the plan.",
+      "concepts": [
+        {
+          "term": "Acceptance criterion",
+          "analogy": "The finish line painted on the track",
+          "definition": "A clear condition that says what counts as complete or good enough.",
+          "example": "A storage fix is complete when the approved routine finishes and the post-scan receipt is recorded."
+        },
+        {
+          "term": "Evidence",
+          "analogy": "A photograph of the trail marker",
+          "definition": "An observable result that supports or challenges a conclusion.",
+          "example": "A before-and-after measurement is evidence that a cleanup changed the intended category."
+        },
+        {
+          "term": "Next action",
+          "analogy": "The next square in a board game",
+          "definition": "The smallest specific step that moves the task forward and produces a useful result.",
+          "example": "Run the validator and inspect the first reported error is more actionable than review the project."
+        }
+      ],
+      "misconception": "More notes automatically make a handoff clearer. A long record can still hide the one decision, check, or blocker that matters next.",
+      "takeaway": "Leave one observable next action, the evidence it should produce, and the condition that would change course."
+    },
+    {
+      "id": "backups-have-different-clocks",
+      "dayOffset": 15,
+      "title": "A backup has more than one clock",
+      "deck": "A copy is useful when its freshness and restore path fit the risk.",
+      "readMinutes": 4,
+      "summary": "A backup plan answers more than where a copy lives. It also answers how much recent work can be lost, how quickly the work must return, and whether the restore path has been tested. Those answers turn a reassuring copy into a usable recovery plan.",
+      "concepts": [
+        {
+          "term": "Recovery point objective",
+          "analogy": "How many pages you can afford to lose from a notebook",
+          "definition": "The maximum acceptable age of data that could be lost after a failure.",
+          "example": "With a daily backup, a failure just before the next run could cost up to a day of recent project changes."
+        },
+        {
+          "term": "Recovery time objective",
+          "analogy": "How long the shop can stay closed",
+          "definition": "The maximum acceptable time to restore access to the work or service.",
+          "example": "A personal archive may tolerate an afternoon of recovery, while a live service may need a much shorter plan."
+        },
+        {
+          "term": "Restore test",
+          "analogy": "Trying the spare key before the lockout",
+          "definition": "A controlled check that a backup can be read and used to recover the intended data.",
+          "example": "Restore one file or a small project copy to a temporary location and verify that it opens."
+        }
+      ],
+      "misconception": "A successful backup job proves that recovery will work. A copy can be incomplete, inaccessible, too old, or missing the instructions needed to use it.",
+      "takeaway": "Judge a backup by how fresh it is, how fast it can return the work, and whether a small restore has been tested."
+    },
+    {
+      "id": "cleanup-leaves-a-receipt",
+      "dayOffset": 16,
+      "title": "A safe cleanup leaves a receipt",
+      "deck": "A before-and-after record makes a small change easier to trust.",
+      "readMinutes": 4,
+      "summary": "Good cleanup is not only about removing files. It also records what was eligible, what changed, and what the follow-up scan found. That short receipt helps you distinguish a useful result from an accidental or unexplained change.",
+      "concepts": [
+        {
+          "term": "Allowlist",
+          "analogy": "A guest list at the door",
+          "definition": "An explicit set of targets that a tool is permitted to handle.",
+          "example": "A routine can allow a rebuildable cache while leaving source projects, personal files, and app data outside its scope."
+        },
+        {
+          "term": "Before-and-after measurement",
+          "analogy": "A photo taken before and after moving furniture",
+          "definition": "Two comparable observations used to show what changed after an action.",
+          "example": "A post-cleanup storage scan can show whether the approved target changed without claiming that every change came from the cleanup."
+        },
+        {
+          "term": "Cleanup receipt",
+          "analogy": "A store receipt for a careful purchase",
+          "definition": "A compact record of the action, its scope, its result, and any remaining limitation.",
+          "example": "A receipt can say that zero approved targets were present, so nothing was removed, while review-only categories stayed untouched."
+        }
+      ],
+      "misconception": "A cleanup that reports zero removed bytes is not necessarily broken. An empty allowlist can be the correct result, and a permission boundary is a reason to stop rather than broaden the command.",
+      "takeaway": "Define the target, measure the change, and record the result. A small receipt makes safe maintenance explainable and repeatable."
+    },
+    {
+      "id": "memory-is-a-working-budget",
+      "dayOffset": 17,
+      "title": "Memory is a working budget",
+      "deck": "The useful question is whether active work has enough room to move.",
+      "readMinutes": 4,
+      "summary": "Memory is not a score to maximize or a shelf that should stay empty. The system uses it for active work, compression, and useful caches, then changes the mix as demand shifts. Looking at the workload and its pressure gives a better explanation than one free-memory number.",
+      "concepts": [
+        {
+          "term": "Working set",
+          "analogy": "The tools spread across your desk for one job",
+          "definition": "The data and code an active workload needs to access repeatedly right now.",
+          "example": "Editing a large image can enlarge the working set even if the source file itself lives on storage."
+        },
+        {
+          "term": "Memory pressure",
+          "analogy": "A desk manager noticing that papers keep getting pushed aside",
+          "definition": "A combined signal of how much effort the system is spending to satisfy current memory demand.",
+          "example": "Sustained high pressure while several heavy apps are open is stronger evidence than a brief low-free-memory reading."
+        },
+        {
+          "term": "Headroom",
+          "analogy": "A clear corner reserved for the next tool",
+          "definition": "Unused capacity that lets new work arrive without immediate queuing, swapping, or failure.",
+          "example": "Leaving some memory and storage headroom gives a build room for temporary files and active compiler work."
+        }
+      ],
+      "misconception": "More free memory is not automatically better, and adding storage does not increase RAM. Judge memory by sustained pressure and the workload's response, not by an isolated number.",
+      "takeaway": "Treat memory as a working budget: identify the active workload, watch sustained pressure, and preserve enough headroom for the next step."
+    },
+    {
+      "id": "generated-files-need-a-boundary",
+      "dayOffset": 18,
+      "title": "Generated files need a boundary",
+      "deck": "A clean project keeps source, outputs, and local state easy to tell apart.",
+      "readMinutes": 3,
+      "summary": "Projects become easier to understand when the files you edit are separate from files tools create. A clear boundary protects source work, keeps reviews focused, and makes it safer to rebuild or remove generated outputs when they grow large.",
+      "concepts": [
+        {
+          "term": "Source of truth",
+          "analogy": "The recipe card a kitchen agrees to follow",
+          "definition": "The small set of human-maintained files that defines how a project should work.",
+          "example": "A component file and its configuration may be the source of truth, while a compiled bundle is an output made from them."
+        },
+        {
+          "term": "Generated artifact",
+          "analogy": "The meal prepared from the recipe",
+          "definition": "A file or folder produced by a tool from source inputs rather than edited as the primary project definition.",
+          "example": "A build directory can be recreated from source and a lockfile, so it usually does not belong in the code review."
+        },
+        {
+          "term": "Ignore rule",
+          "analogy": "A sign showing which supplies stay off the shared counter",
+          "definition": "A project rule that keeps local or generated files out of version control and routine review.",
+          "example": "An ignore rule can exclude build output and local environment files while keeping the configuration template visible."
+        }
+      ],
+      "misconception": "If a generated folder is large, deleting it is always the right first move. First confirm that it is reproducible, identify what creates it, and check whether any unusual local data is mixed in.",
+      "takeaway": "Keep source, generated output, and local state distinct. That boundary makes collaboration, rebuilding, and safe maintenance easier."
+    },
+    {
+      "id": "project-hygiene-starts-with-ownership",
+      "dayOffset": 19,
+      "title": "Every project folder needs an owner",
+      "deck": "A clear owner and lifecycle make project cleanup easier to trust.",
+      "readMinutes": 4,
+      "summary": "A large project folder is easier to maintain when you can answer four simple questions: who owns it, what creates each generated part, how it can be rebuilt, and when old output can be retired. Ownership turns an ambiguous pile of files into a system with decisions attached.",
+      "concepts": [
+        {
+          "term": "Ownership",
+          "analogy": "The person responsible for a shared workshop shelf",
+          "definition": "A named person, team, or process responsible for deciding what a project folder contains and how it is maintained.",
+          "example": "A project owner can confirm whether an old build is disposable or whether it is needed for a release comparison."
+        },
+        {
+          "term": "Lifecycle",
+          "analogy": "A tool's journey from new purchase to retirement",
+          "definition": "The stages a file or folder passes through, such as creation, active use, archival, and removal.",
+          "example": "A preview build may be active during a review, archived after approval, and removed once the source and release record are safe."
+        },
+        {
+          "term": "Lockfile",
+          "analogy": "A recipe with exact ingredient versions written down",
+          "definition": "A generated or maintained record that pins dependency versions so a project can be recreated more consistently.",
+          "example": "A package lockfile helps a teammate reinstall the same dependency tree after a rebuildable folder is removed."
+        }
+      ],
+      "misconception": "An ignore rule proves that a folder is safe to delete. It only says the folder is excluded from routine version control; ownership, rebuildability, and unusual local data still need checking.",
+      "takeaway": "For every large project folder, identify its owner, generator, rebuild path, and retention decision before changing it."
+    },
+    {
+      "id": "privacy-is-a-design-constraint",
+      "dayOffset": 20,
+      "title": "Privacy starts before the report",
+      "deck": "A privacy-safe workflow limits collection before it writes anything down.",
+      "readMinutes": 4,
+      "summary": "Privacy is easiest to protect when it shapes the measurement itself. Decide which fields are necessary, aggregate them at the source, keep a short retention window, and leave out content that does not improve the decision. A useful report can describe a pattern without preserving the material that produced it.",
+      "concepts": [
+        {
+          "term": "Data minimization",
+          "analogy": "Packing only the tools needed for one repair",
+          "definition": "Collecting and retaining only the smallest amount of information needed for a stated purpose.",
+          "example": "A workflow report can keep category counts and shares without keeping prompts, message bodies, or file contents."
+        },
+        {
+          "term": "Metadata",
+          "analogy": "The label on a parcel rather than everything inside it",
+          "definition": "Information about an item or activity, such as a timestamp, type, size, or title, rather than its full content.",
+          "example": "A task type and local date can support an aggregate trend while the conversation itself remains unread and unrecorded."
+        },
+        {
+          "term": "Retention window",
+          "analogy": "A notice board that clears old notices regularly",
+          "definition": "The defined period for keeping collected information before it is removed or replaced.",
+          "example": "A fourteen-day summary window can show recent work patterns without becoming a permanent activity archive."
+        }
+      ],
+      "misconception": "Data is private enough just because it stays on the same computer. Local files can still expose personal content, paths, names, or habits to anyone or any process that can read them.",
+      "takeaway": "Choose the purpose first, aggregate early, retain briefly, and keep content out when metadata is enough."
+    },
+    {
+      "id": "checkpoints-make-work-resumable",
+      "dayOffset": 21,
+      "title": "A checkpoint is a promise to your future self",
+      "deck": "Small, explicit checkpoints make unfinished work easier to resume safely.",
+      "readMinutes": 4,
+      "summary": "A useful checkpoint says what the work is trying to achieve, what has already been verified, and what remains uncertain. It does not need to preserve every detail. A short, current record gives the next session enough context to continue without guessing or repeating completed work.",
+      "concepts": [
+        {
+          "term": "Checkpoint",
+          "analogy": "A trail marker showing where to rejoin the path",
+          "definition": "A small record of current state, completed verification, and the next safe action.",
+          "example": "After a storage run, a checkpoint can record the snapshot compared, the cleanup result, and the alert that still needs attention."
+        },
+        {
+          "term": "Invariant",
+          "analogy": "A rule that must remain true while a room is rearranged",
+          "definition": "A condition that should stay true before and after a change.",
+          "example": "A cleanup invariant can be that review-only categories and files outside the allowlist remain untouched."
+        },
+        {
+          "term": "Handoff",
+          "analogy": "Passing a relay baton with the route and next stride clear",
+          "definition": "A concise transfer of intent, evidence, constraints, and next action to another session or person.",
+          "example": "A coding handoff can name the changed files, the passing test, the open edge case, and the command to run next."
+        }
+      ],
+      "misconception": "A long transcript is automatically a good checkpoint. More history can make the important state harder to find and can preserve details that the next decision does not need.",
+      "takeaway": "Record the goal, verified facts, constraints, open risk, and next action; keep the checkpoint short enough to trust."
+    },
+    {
+      "id": "restore-drills-reveal-backup-gaps",
+      "dayOffset": 22,
+      "title": "A backup is only real when it comes back",
+      "deck": "Restore practice turns a reassuring copy into usable protection.",
+      "readMinutes": 4,
+      "summary": "A backup can exist and still fail when you need it. The useful habit is to separate making a copy, keeping useful versions, and practicing a small restore. A simple restore drill can reveal missing permissions, incomplete files, expired retention, or a recovery process nobody remembers.",
+      "concepts": [
+        {
+          "term": "Restore test",
+          "analogy": "Trying the spare key before the front door is locked",
+          "definition": "A planned check that retrieves selected data from a backup and confirms it is usable.",
+          "example": "Restore one representative project file to a temporary folder and open it before relying on the backup for a larger recovery."
+        },
+        {
+          "term": "Retention",
+          "analogy": "A shelf rule for how long old notebooks stay available",
+          "definition": "The period during which backup versions are kept before they are replaced or removed.",
+          "example": "A daily backup may protect recent edits while a monthly version preserves a longer-running history."
+        },
+        {
+          "term": "Recovery point",
+          "analogy": "The last trail marker you can safely return to",
+          "definition": "The time represented by the most recent usable backup version available for recovery.",
+          "example": "If the last successful backup ran yesterday evening, changes made afterward may not be part of the available recovery point."
+        }
+      ],
+      "misconception": "A backup job that reports success guarantees that recovery will work. Success may only mean that copying finished; it does not prove that the right data, permissions, and restore steps are usable.",
+      "takeaway": "Keep backups with a clear retention plan and practice a small restore often enough that recovery is familiar."
+    },
+    {
+      "id": "free-space-is-headroom",
+      "dayOffset": 23,
+      "title": "Free space is headroom, not a finish line",
+      "deck": "A little room lets ordinary work absorb temporary change safely.",
+      "readMinutes": 4,
+      "summary": "Free storage is useful because work is not perfectly still. Updates, exports, indexes, and temporary files all need room to appear before they are removed or moved elsewhere. The practical goal is enough headroom for the next normal task, not an empty disk.",
+      "concepts": [
+        {
+          "term": "Headroom",
+          "analogy": "The empty space above a box before the lid closes",
+          "definition": "Capacity reserved for new or temporary work so the system does not operate at the edge.",
+          "example": "An export may need temporary space even when the final video will be stored somewhere else."
+        },
+        {
+          "term": "Temporary file",
+          "analogy": "A workbench copy used while making the final object",
+          "definition": "A short-lived file created to support an operation such as editing, downloading, or building.",
+          "example": "An installer can unpack files before it replaces an older application version."
+        },
+        {
+          "term": "Threshold",
+          "analogy": "A warning line on a measuring cup",
+          "definition": "A chosen level at which a condition deserves attention or a different response.",
+          "example": "A storage monitor can warn below a selected threshold while still leaving the decision to the person responsible."
+        }
+      ],
+      "misconception": "The best storage state is an almost empty disk. A healthy system needs usable headroom, but the right amount depends on workload, update size, and recovery needs.",
+      "takeaway": "Keep enough headroom for the next ordinary operation, and treat a threshold as a prompt to investigate rather than a reason to delete blindly."
+    },
+    {
+      "id": "performance-needs-a-bottleneck",
+      "dayOffset": 24,
+      "title": "Performance needs a bottleneck",
+      "deck": "A useful diagnosis asks which limit is actually slowing the work.",
+      "readMinutes": 4,
+      "summary": "Performance is the result of a whole path: input, computation, memory, storage, and output. A fast component cannot remove a delay somewhere else in the path. Naming the current bottleneck makes the next measurement and fix much clearer.",
+      "concepts": [
+        {
+          "term": "Latency",
+          "analogy": "The wait before a clerk starts serving you",
+          "definition": "The time between requesting an operation and receiving its first useful response.",
+          "example": "A command can have low total work but still feel slow if it waits a long time before showing anything."
+        },
+        {
+          "term": "Throughput",
+          "analogy": "How many parcels a loading dock handles per hour",
+          "definition": "The amount of useful work completed in a unit of time.",
+          "example": "A build system may improve throughput by compiling several independent files at once."
+        },
+        {
+          "term": "Bottleneck",
+          "analogy": "The narrowest part of a pipe",
+          "definition": "The limiting part of a process that constrains the result of the whole system.",
+          "example": "More CPU will not fix a process that spends most of its time waiting for a slow network response."
+        }
+      ],
+      "misconception": "One impressive hardware number explains overall performance. The slowest relevant step can dominate the experience, and the bottleneck can move after a change.",
+      "takeaway": "Measure the path, identify the current bottleneck, and verify that the next change improves the work that actually feels slow."
+    },
+    {
+      "id": "backups-need-separation",
+      "dayOffset": 25,
+      "title": "Backups need separation",
+      "deck": "A second copy helps most when the same failure cannot remove both copies.",
+      "readMinutes": 4,
+      "summary": "A backup is a recovery option, not merely a duplicate with a different name. If the original and the copy share the same device, account, mistake, or failure mode, one event can affect both. Separation gives a backup a better chance to remain available when the original is not.",
+      "concepts": [
+        {
+          "term": "Redundancy",
+          "analogy": "A spare bridge across the river",
+          "definition": "Additional capacity or copies that can support recovery when one part fails.",
+          "example": "Keeping another copy can preserve access if the primary drive stops working."
+        },
+        {
+          "term": "Independence",
+          "analogy": "Two keys stored in different safe places",
+          "definition": "The degree to which one copy can survive the failure, mistake, or access problem affecting another.",
+          "example": "A backup on a separate device has more independence from a failure of the working drive."
+        },
+        {
+          "term": "Version history",
+          "analogy": "Several dated drafts in a folder",
+          "definition": "Multiple preserved points in time that allow recovery from deletion, corruption, or unwanted edits.",
+          "example": "An older version can be useful when the newest synchronized copy contains an accidental change."
+        }
+      ],
+      "misconception": "Two copies in the same place provide the same protection as two independent copies. Shared location, account, or automation can create one common failure point.",
+      "takeaway": "Give important data a recovery copy with a meaningfully different failure path, and preserve enough versions for the mistakes you need to undo."
+    },
+    {
+      "id": "project-outputs-need-a-home",
+      "dayOffset": 26,
+      "title": "Project outputs need a home",
+      "deck": "Clear boundaries make generated work easier to rebuild, review, and retire.",
+      "readMinutes": 4,
+      "summary": "A project is easier to maintain when source files, generated outputs, local settings, and release records have distinct homes. That separation reduces accidental commits, makes rebuilds more predictable, and gives old outputs a clear retention decision instead of leaving them in an unnamed pile.",
+      "concepts": [
+        {
+          "term": "Artifact boundary",
+          "analogy": "A marked area where workshop scraps belong",
+          "definition": "A deliberate separation between maintained inputs and files produced during a workflow.",
+          "example": "A project can keep source in one directory and generated builds in a clearly named output directory."
+        },
+        {
+          "term": "Reproducibility",
+          "analogy": "A recipe another cook can follow",
+          "definition": "The ability to recreate a result from recorded inputs, tools, and steps.",
+          "example": "A lockfile and build instructions make it easier to recreate an output after the old build folder is removed."
+        },
+        {
+          "term": "Retention decision",
+          "analogy": "A shelf label saying keep, archive, or recycle",
+          "definition": "An explicit choice about how long a generated file should remain available and why.",
+          "example": "A release archive may be retained for support while an experimental preview can expire after review."
+        }
+      ],
+      "misconception": "Putting every generated file under version control is the safest way to preserve a project. Large outputs can hide the source of truth and make ordinary review harder.",
+      "takeaway": "Give outputs a clear boundary, record how to recreate them, and attach a retention reason before they accumulate."
+    },
+    {
+      "id": "privacy-needs-purpose-limits",
+      "dayOffset": 27,
+      "title": "Privacy needs purpose limits",
+      "deck": "A report is safer when every retained field has a job.",
+      "readMinutes": 4,
+      "summary": "Privacy is easier to maintain when collection starts with a narrow question. Keep only fields that answer that question, aggregate them before they become a history of individual activity, and define who or what can read the result. Less retained detail means fewer accidental disclosures to prevent.",
+      "concepts": [
+        {
+          "term": "Purpose limitation",
+          "analogy": "A shopping list for one meal",
+          "definition": "Collecting and using information only for a specific, stated need.",
+          "example": "A storage trend needs byte counts and dates, not the names or contents of personal documents."
+        },
+        {
+          "term": "Aggregation",
+          "analogy": "Counting boxes without opening them",
+          "definition": "Combining individual observations into a summary that answers a question without preserving each detail.",
+          "example": "A report can keep a category count for recent work instead of retaining each task's conversation."
+        },
+        {
+          "term": "Access boundary",
+          "analogy": "A locked cabinet with a short guest list",
+          "definition": "A technical or procedural limit on which people or processes can read a dataset.",
+          "example": "A local dashboard can expose a summary while keeping raw activity records outside the dashboard data path."
+        }
+      ],
+      "misconception": "A field is harmless because it seems small or ordinary. A collection of small fields can still reveal identity, habits, paths, or sensitive context when combined.",
+      "takeaway": "State the purpose, aggregate early, keep retention short, and make the access boundary part of the design."
+    },
+    {
+      "id": "agent-work-needs-a-next-action",
+      "dayOffset": 28,
+      "title": "Agent work needs a next action",
+      "deck": "A small, testable next step keeps delegated work easy to resume.",
+      "readMinutes": 4,
+      "summary": "Agent-assisted work becomes easier to trust when the handoff names the next action in plain language. The next action should fit the current constraints, produce observable evidence, and make it clear whether the task is complete or needs a different decision.",
+      "concepts": [
+        {
+          "term": "Intent",
+          "analogy": "The destination written on a travel card",
+          "definition": "The outcome the work is meant to achieve, separate from the steps used to reach it.",
+          "example": "The intent may be a validated data refresh, while the exact files changed are implementation details."
+        },
+        {
+          "term": "Constraint",
+          "analogy": "The guardrails along a mountain road",
+          "definition": "A condition that limits which actions are allowed or which result is acceptable.",
+          "example": "A cleanup constraint can forbid touching personal files even if they are large."
+        },
+        {
+          "term": "Verification step",
+          "analogy": "Checking the address before handing over a parcel",
+          "definition": "A concrete check that shows whether the intended result was achieved without breaking an invariant.",
+          "example": "Running the validator and checking the changed-file list can verify both data shape and scope."
+        }
+      ],
+      "misconception": "A detailed plan is always a better handoff than one clear next action. Too many speculative steps can hide the current decision and make resumption less safe.",
+      "takeaway": "Write the intent, preserve the constraints, and leave one small verification step that tells the next session what to do."
+    },
+    {
+      "id": "memory-has-layers",
+      "dayOffset": 29,
+      "title": "Memory has layers",
+      "deck": "Fast working space, helpful copies, and overflow space each play a different role.",
+      "readMinutes": 4,
+      "summary": "A computer's memory story is not one bucket called free or full. Active data may be held in fast working memory, repeated data may be kept in a cache, and less-active data may move to slower storage-backed space. The useful question is which layer is carrying the pressure and what the workload feels like.",
+      "concepts": [
+        {
+          "term": "Working memory",
+          "analogy": "The tools currently on the desk",
+          "definition": "Fast memory used for data and instructions the system needs to access actively.",
+          "example": "A running editor keeps the current document and nearby operations ready in working memory."
+        },
+        {
+          "term": "Cache",
+          "analogy": "A shelf of frequently used supplies",
+          "definition": "Stored data kept because it may be useful again, but which can usually be recreated or replaced.",
+          "example": "A browser may cache images so a familiar page opens faster on a later visit."
+        },
+        {
+          "term": "Paging",
+          "analogy": "Moving rarely used papers into a nearby archive box",
+          "definition": "Moving less-active memory between fast working memory and slower storage-backed space.",
+          "example": "The system may page background data out of fast memory so an active operation can continue."
+        }
+      ],
+      "misconception": "A cache or a large amount of storage-backed memory is equivalent to adding physical RAM. These layers can help the system cope, but they have different speed and capacity tradeoffs.",
+      "takeaway": "Separate working memory, useful caches, and paging when diagnosing a slowdown; the layer under pressure determines the sensible next check."
+    },
+    {
+      "id": "snapshots-need-the-same-lens",
+      "dayOffset": 30,
+      "title": "Snapshots need the same lens",
+      "deck": "A storage trend is useful only when each reading measures comparable ground.",
+      "readMinutes": 4,
+      "summary": "A daily storage reading is one measurement at one moment, not a diagnosis by itself. Comparing snapshots is useful when they use the same roots, exclusions, units, and timing. If the scan changes, a category can appear to grow or shrink even when the files did not.",
+      "concepts": [
+        {
+          "term": "Baseline",
+          "analogy": "The first photograph in a before-and-after pair",
+          "definition": "A reference measurement used to judge a later change.",
+          "example": "Yesterday's post-cleanup snapshot can be the baseline for today's storage comparison."
+        },
+        {
+          "term": "Delta",
+          "analogy": "The distance between two marks on a ruler",
+          "definition": "The difference between two measurements made with the same method.",
+          "example": "A positive free-space delta means today's reading has more available storage than the baseline."
+        },
+        {
+          "term": "Coverage",
+          "analogy": "The shaded portion of a map",
+          "definition": "The portion of the measured space that a scanner could account for under its rules.",
+          "example": "A scan that measures Projects but excludes restricted system locations has partial coverage of the disk."
+        }
+      ],
+      "misconception": "A larger category in the latest report proves that its files grew. A changed scan scope, permission boundary, unit, or attribution rule can change the number without the underlying files changing.",
+      "takeaway": "Compare like-for-like post-cleanup snapshots, keep coverage visible, and treat a changed measurement method as part of the explanation."
+    },
+    {
+      "id": "storage-needs-a-retention-reason",
+      "dayOffset": 31,
+      "title": "Storage needs a retention reason",
+      "deck": "A clear reason to keep a file is more useful than a vague fear of deleting it.",
+      "readMinutes": 4,
+      "summary": "Storage decisions get easier when each file or folder has a job, an owner, and a reason to remain. Source material may need careful preservation, while generated outputs may need a shorter review window. Naming the reason makes cleanup safer because it separates important history from rebuildable residue.",
+      "concepts": [
+        {
+          "term": "Retention",
+          "analogy": "A library rule for how long a book stays on the shelf",
+          "definition": "The decision about how long information should remain available and under what conditions.",
+          "example": "A release record may be retained for support while a temporary preview can be removed after review."
+        },
+        {
+          "term": "Source of truth",
+          "analogy": "The master recipe behind many plated meals",
+          "definition": "The maintained input that should be trusted when recreating or checking a result.",
+          "example": "Source code and a lockfile can be the source of truth for a generated build folder."
+        },
+        {
+          "term": "Rebuild path",
+          "analogy": "A route back to the workshop",
+          "definition": "The documented inputs and steps needed to recreate a generated result.",
+          "example": "A project note can name the command, dependencies, and configuration needed to recreate a preview."
+        }
+      ],
+      "misconception": "Keeping every output forever is the safest form of preservation. Unnamed copies can hide the maintained source, consume space, and make it harder to identify which result is trustworthy.",
+      "takeaway": "For anything you keep, name its purpose; for anything you remove, confirm the source of truth and rebuild path first."
+    },
+    {
+      "id": "performance-needs-a-small-experiment",
+      "dayOffset": 32,
+      "title": "Performance needs a small experiment",
+      "deck": "A narrow comparison teaches more than a long list of guesses.",
+      "readMinutes": 4,
+      "summary": "Performance work is easier to reason about when one suspected bottleneck is changed at a time and the result is checked with the same task. This turns a feeling such as ‘it is slow’ into a comparison that can support the next decision without pretending that one example measures every workload.",
+      "concepts": [
+        {
+          "term": "Bottleneck",
+          "analogy": "The narrowest part of a funnel",
+          "definition": "The resource or step that most limits the speed of the current workload.",
+          "example": "A slow disk read can limit an export even when the processor is not fully busy."
+        },
+        {
+          "term": "Baseline",
+          "analogy": "A starting line before a race",
+          "definition": "A recorded reference result made before a change.",
+          "example": "Time the same representative action once before changing a cache or rendering path."
+        },
+        {
+          "term": "Controlled comparison",
+          "analogy": "Changing one ingredient while keeping the recipe the same",
+          "definition": "A comparison where the important conditions stay consistent except for the factor being tested.",
+          "example": "Use the same input and verification step when comparing two implementation choices."
+        }
+      ],
+      "misconception": "A faster result in one run proves the whole system is faster. Background activity, warm caches, input differences, and measurement noise can change a single observation.",
+      "takeaway": "Name the suspected bottleneck, keep the comparison narrow, and record enough context to repeat the check."
+    },
+    {
+      "id": "backups-need-a-restore-check",
+      "dayOffset": 33,
+      "title": "Backups need a restore check",
+      "deck": "A backup becomes trustworthy when you can recover a useful piece from it.",
+      "readMinutes": 4,
+      "summary": "A backup can exist without being ready for recovery. A file may be incomplete, an account may have lost access, or the restore steps may be unclear. A small, safe restore check tests the path while the original data is still available and turns a hopeful copy into a more understood recovery option.",
+      "concepts": [
+        {
+          "term": "Restore",
+          "analogy": "Taking a book back off the emergency shelf",
+          "definition": "Recovering usable data from a backup or other preserved copy.",
+          "example": "Open a recovered document in a separate location and confirm that it is usable."
+        },
+        {
+          "term": "Integrity",
+          "analogy": "A sealed parcel arriving with its contents intact",
+          "definition": "The condition that preserved data remains complete and unchanged in the ways that matter for recovery.",
+          "example": "A restore check can confirm that a project archive contains the expected files and opens correctly."
+        },
+        {
+          "term": "Recovery procedure",
+          "analogy": "An evacuation map posted before the alarm",
+          "definition": "The ordered steps, access details, and decisions needed to recover from a failure.",
+          "example": "A short note can record where the copy lives, which account can access it, and how to restore one item."
+        }
+      ],
+      "misconception": "A successful backup job proves that recovery will work. Copying can finish while access, completeness, encryption keys, or restore instructions still have a problem.",
+      "takeaway": "Test a small restore periodically, keep the recovery steps with the backup plan, and treat the result as evidence rather than a promise."
+    },
+    {
+      "id": "projects-need-a-clean-boundary",
+      "dayOffset": 34,
+      "title": "Projects need a clean boundary",
+      "deck": "Keep source, generated output, and personal scratch space easy to tell apart.",
+      "readMinutes": 4,
+      "summary": "A project is easier to understand when its durable source is separated from files a tool can regenerate and from private scratch material. Clear boundaries make storage reports more useful, make handoffs safer, and reduce the chance that a cleanup or rebuild removes something that carried meaning.",
+      "concepts": [
+        {
+          "term": "Source of truth",
+          "analogy": "The signed master recipe",
+          "definition": "The durable files that explain how a project is meant to work and can be used to recreate its result.",
+          "example": "A repository's source code and configuration should explain how to rebuild the app even if generated folders are absent."
+        },
+        {
+          "term": "Generated output",
+          "analogy": "A printed copy made from the recipe",
+          "definition": "A file or folder produced by a tool from source material rather than authored as the primary record.",
+          "example": "A build folder can be recreated from the project's source and dependencies after a clean checkout."
+        },
+        {
+          "term": "Boundary",
+          "analogy": "A labeled shelf between shared supplies and private notes",
+          "definition": "A clear rule about what belongs to the project, what can be rebuilt, and what should remain personal or temporary.",
+          "example": "A short README and ignore rule can keep local experiments out of the shared source while leaving the rebuild path visible."
+        }
+      ],
+      "misconception": "A folder being inside a project does not make every file equally important. Some files define the work, some are generated from it, and some are private context that should not be copied or deleted casually.",
+      "takeaway": "Name the source of truth, mark generated output, and keep personal scratch space outside the shared boundary whenever possible."
+    },
+    {
+      "id": "privacy-needs-a-data-boundary",
+      "dayOffset": 35,
+      "title": "Privacy needs a data boundary",
+      "deck": "A useful report can stay useful without carrying the private material behind it.",
+      "readMinutes": 4,
+      "summary": "Privacy improves when a workflow collects only what its decision needs, turns individual records into safe totals before sharing them, and removes detail when its purpose is finished. The goal is not to make every report empty; it is to keep the report useful while leaving private source material at home.",
+      "concepts": [
+        {
+          "term": "Data minimization",
+          "analogy": "Packing only what you need for a short trip",
+          "definition": "Collecting and retaining no more personal information than the stated purpose requires.",
+          "example": "A workflow dashboard can record category counts without copying prompts, message bodies, or file contents."
+        },
+        {
+          "term": "Aggregation",
+          "analogy": "Watching the shape of a crowd from a distance",
+          "definition": "Combining individual records so a report describes a pattern instead of exposing each activity.",
+          "example": "A report can say that seven recent tasks carried a research signal without listing the task titles."
+        },
+        {
+          "term": "Retention window",
+          "analogy": "A pantry shelf with an expiry label",
+          "definition": "A rule for how long collected information remains available before it is replaced or removed.",
+          "example": "A rolling fourteen-day summary can be refreshed from current metadata instead of keeping an ever-growing activity log."
+        }
+      ],
+      "misconception": "Removing a person's name makes any remaining data private. Rare combinations of timing, paths, titles, or other details can still identify an activity or reveal more than the report needs.",
+      "takeaway": "Set the purpose first, collect the minimum, aggregate before sharing, and give the remaining detail a clear retention limit."
+    },
+    {
+      "id": "agent-work-needs-a-stop-condition",
+      "dayOffset": 36,
+      "title": "Agent work needs a stop condition",
+      "deck": "A task is easier to trust when it says what finished looks like.",
+      "readMinutes": 4,
+      "summary": "Agent work can wander when the desired result, verification step, or boundary is left implicit. A small stop condition makes the work easier to review: state the outcome, check the important invariant, and stop when the agreed scope is met. This keeps a useful task from turning into unrequested changes or endless polishing.",
+      "concepts": [
+        {
+          "term": "Acceptance criterion",
+          "analogy": "The final item on a packing list",
+          "definition": "A concrete condition that shows the requested result is present and usable.",
+          "example": "A dashboard task can require that the approved data files validate and that unrelated files remain unchanged."
+        },
+        {
+          "term": "Invariant",
+          "analogy": "A guardrail that stays in place while the road changes",
+          "definition": "A property that must remain true before, during, and after a change.",
+          "example": "A privacy invariant can require that a report contain aggregate counts but no prompt bodies, secrets, or file contents."
+        },
+        {
+          "term": "Stop condition",
+          "analogy": "A marked turn-around point on a trail",
+          "definition": "A stated point at which the task is complete or must pause for a new decision.",
+          "example": "Once the requested files pass validation and the named comparison is reported, further cleanup requires a separate request."
+        }
+      ],
+      "misconception": "More work after the requested result is always safer or more helpful. Extra investigation or polishing can expand scope, alter unrelated state, and make the original result harder to review.",
+      "takeaway": "Define the result, name the invariant to protect, and treat the stop condition as part of the task rather than an afterthought."
+    },
+    {
+      "id": "memory-needs-a-working-set",
+      "dayOffset": 37,
+      "title": "Memory needs a working set",
+      "deck": "The useful question is what must stay ready for the current job.",
+      "readMinutes": 4,
+      "summary": "A computer does not need every file open at once. It needs the active pieces of the current job close at hand, while less urgent pieces can wait. Thinking in terms of a working set makes memory conversations more practical than chasing an empty-memory number.",
+      "concepts": [
+        {
+          "term": "Working set",
+          "analogy": "The pages spread across a desk",
+          "definition": "The data and code an active workload needs to reach quickly.",
+          "example": "A browser with several active tabs and a design editor may need a larger working set than a text note."
+        },
+        {
+          "term": "Background process",
+          "analogy": "A helper working in the next room",
+          "definition": "A running task that supports the system or an app without being the current foreground action.",
+          "example": "Indexing or syncing can use memory while you edit a document."
+        },
+        {
+          "term": "Memory pressure",
+          "analogy": "How crowded the desk feels while you work",
+          "definition": "A combined signal of how easily the system is meeting current memory demand.",
+          "example": "Sustained pressure during the same task is more useful evidence than one momentary free-memory reading."
+        }
+      ],
+      "misconception": "The largest possible amount of free RAM is not the goal. Memory used for useful caches and active work can be reclaimed when another task needs it.",
+      "takeaway": "Describe the current workload, watch sustained pressure, and treat free RAM as context rather than a target score."
+    },
+    {
+      "id": "storage-needs-a-receipt",
+      "dayOffset": 38,
+      "title": "Storage cleanup needs a receipt",
+      "deck": "A clear record makes a reversible cleanup easier to trust.",
+      "readMinutes": 3,
+      "summary": "Cleaning storage changes the evidence you will use later. A receipt preserves what was selected, why it was allowed, and how much space the operation reported. That record helps separate an intentional rebuild from an accidental disappearance.",
+      "concepts": [
+        {
+          "term": "Cleanup receipt",
+          "analogy": "A store receipt for a return",
+          "definition": "A small record of what a cleanup operation changed and what it reported reclaiming.",
+          "example": "A receipt can group reclaimed bytes by approved target without listing private file contents."
+        },
+        {
+          "term": "Allowlist",
+          "analogy": "A guest list at a door",
+          "definition": "An explicit set of targets that an operation is permitted to touch.",
+          "example": "A safe routine may allow rebuildable build output while leaving personal folders outside the list."
+        },
+        {
+          "term": "Rebuild path",
+          "analogy": "The instructions for making a replacement part",
+          "definition": "The known steps and source needed to recreate removed generated data.",
+          "example": "A project can document the command or tool that regenerates a build folder after cleanup."
+        }
+      ],
+      "misconception": "A larger reclaimed number does not make a cleanup safer. Scope, ownership, and a usable rebuild path matter as much as the bytes reported.",
+      "takeaway": "Keep a concise receipt, name the allowlist, and make the rebuild path understandable before trusting a cleanup."
+    },
+    {
+      "id": "performance-starts-with-a-baseline",
+      "dayOffset": 39,
+      "title": "Performance starts with a baseline",
+      "deck": "A before-picture gives a later result something honest to compare with.",
+      "readMinutes": 4,
+      "summary": "When an app feels slow, memory, storage, network, and application work can all be suspects. A baseline records one representative action before a change. Repeating that action afterward makes the result easier to discuss without pretending one example measures every device or workload.",
+      "concepts": [
+        {
+          "term": "Baseline",
+          "analogy": "A starting mark on a ruler",
+          "definition": "A reference observation made before changing the system or workload.",
+          "example": "Record how long the same export takes before trying a new setting."
+        },
+        {
+          "term": "Representative task",
+          "analogy": "A sample slice of the whole cake",
+          "definition": "A small action chosen because it resembles the work that actually matters.",
+          "example": "Use the project’s normal preview action instead of an unrelated toy example."
+        },
+        {
+          "term": "Confounding factor",
+          "analogy": "A second hand moving the finish line",
+          "definition": "Another change that can affect the observation besides the factor being tested.",
+          "example": "A background update or a warm cache can change one run even when the code is unchanged."
+        }
+      ],
+      "misconception": "One faster run proves a lasting improvement. Background work, input differences, and cache state can influence a single observation.",
+      "takeaway": "Choose a representative task, record a baseline, repeat the same check, and describe the result as evidence from that example."
+    },
+    {
+      "id": "backups-need-a-job",
+      "dayOffset": 40,
+      "title": "A backup needs a job",
+      "deck": "A copy is easier to trust when you know what failure it is meant to cover.",
+      "readMinutes": 4,
+      "summary": "Different copies protect against different problems. A recent working copy can help with accidental edits, while a separate historical copy can help with a larger failure. Naming the job of each backup makes gaps visible without requiring a complicated system.",
+      "concepts": [
+        {
+          "term": "Backup purpose",
+          "analogy": "The emergency each tool is packed for",
+          "definition": "The specific loss or recovery need a preserved copy is intended to address.",
+          "example": "A daily copy may focus on recovering yesterday’s project after an accidental change."
+        },
+        {
+          "term": "Recovery point",
+          "analogy": "A saved chapter in a book",
+          "definition": "The moment in time represented by a recoverable copy.",
+          "example": "A copy from last night represents a different recovery point from one made last month."
+        },
+        {
+          "term": "Failure mode",
+          "analogy": "The kind of storm a shelter is built for",
+          "definition": "The event or mistake that could make the original data unavailable or wrong.",
+          "example": "Device loss and accidental deletion are different failure modes with different recovery needs."
+        }
+      ],
+      "misconception": "Having one copy somewhere does not prove that every important failure is covered. The copy may be too old, too close to the original, or unable to restore the needed item.",
+      "takeaway": "Name the failure a backup covers, the recovery point it represents, and the smallest restore that would prove it useful."
+    },
+    {
+      "id": "project-hygiene-needs-an-ignore-rule",
+      "dayOffset": 41,
+      "title": "Project hygiene needs an ignore rule",
+      "deck": "A clear rule keeps generated noise from becoming part of the durable project.",
+      "readMinutes": 3,
+      "summary": "Projects often create local output that is useful on one machine but not part of the source. An ignore rule expresses that boundary to version-control tools and to future collaborators. It is a small piece of documentation about what should be rebuilt instead of shared.",
+      "concepts": [
+        {
+          "term": "Ignore rule",
+          "analogy": "A sign saying ‘leave this in the workshop’",
+          "definition": "A rule that tells a version-control tool not to treat matching local files as ordinary project changes.",
+          "example": "Generated build output can stay local when the project already has a documented rebuild path."
+        },
+        {
+          "term": "Tracked file",
+          "analogy": "An item written into the shared ledger",
+          "definition": "A file recorded by version control as part of the project’s change history.",
+          "example": "Source code and configuration are usually tracked so another checkout can reproduce the work."
+        },
+        {
+          "term": "Generated noise",
+          "analogy": "Packing slips mixed into the recipe box",
+          "definition": "Recreated or machine-specific output that obscures the meaningful project changes.",
+          "example": "A local build folder can make a review harder to read when it appears beside a small source edit."
+        }
+      ],
+      "misconception": "Ignoring a path does not make its contents safe to delete. A generated folder can still contain useful local evidence or an unusual artifact that should be preserved separately.",
+      "takeaway": "Use ignore rules to state the project boundary, then keep the rebuild path and any exceptional local data visible."
+    },
+    {
+      "id": "privacy-is-more-than-redaction",
+      "dayOffset": 42,
+      "title": "Privacy is more than redaction",
+      "deck": "Removing a name is not the same as collecting only what the task needs.",
+      "readMinutes": 4,
+      "summary": "A report can still reveal private activity through timing, rare combinations, or unnecessary detail even after obvious names are removed. Privacy starts earlier: define the purpose, collect the smallest useful fields, and aggregate them before they leave the working context.",
+      "concepts": [
+        {
+          "term": "Redaction",
+          "analogy": "Black ink over a sentence",
+          "definition": "Removing or hiding selected details from information that was already collected.",
+          "example": "A report may remove a personal name from a line while leaving the unusual timestamp visible."
+        },
+        {
+          "term": "Data minimization",
+          "analogy": "Packing only the tools needed for one repair",
+          "definition": "Collecting and keeping no more information than the stated purpose requires.",
+          "example": "A workflow summary can keep category totals without copying message bodies."
+        },
+        {
+          "term": "Linkability",
+          "analogy": "Footprints that connect separate paths",
+          "definition": "The ability to connect records that were intended to be viewed separately.",
+          "example": "A rare project name and a precise time can link an aggregate entry back to one activity."
+        }
+      ],
+      "misconception": "Anonymizing one field makes the whole report anonymous. Several harmless-looking fields can combine into a revealing description.",
+      "takeaway": "Minimize at collection time, aggregate before sharing, and remove details that do not change the decision."
+    },
+    {
+      "id": "agent-work-needs-right-sized-evidence",
+      "dayOffset": 43,
+      "title": "Agent work needs right-sized evidence",
+      "deck": "Verification should be large enough to support the claim and small enough to stay understandable.",
+      "readMinutes": 4,
+      "summary": "A useful agent result connects each important claim to a fitting check. A focused test can support a narrow change, while a broader request needs broader verification. Choosing the smallest evidence that answers the real question keeps work reviewable and avoids collecting unrelated private detail.",
+      "concepts": [
+        {
+          "term": "Claim",
+          "analogy": "A sentence in a witness statement",
+          "definition": "A specific statement about what changed, what is true, or what was observed.",
+          "example": "‘The approved data files validate’ is a narrower claim than ‘the whole application is healthy.’"
+        },
+        {
+          "term": "Verification",
+          "analogy": "Checking the lock after saying the door is closed",
+          "definition": "A deliberate check that tests whether a claim holds under the relevant conditions.",
+          "example": "A schema validator is fitting evidence for a data-shape claim."
+        },
+        {
+          "term": "Scope match",
+          "analogy": "Using a key cut for the right lock",
+          "definition": "The degree to which a check covers the same boundary as the claim it supports.",
+          "example": "A file-level test may not support a claim about unrelated deployment behavior."
+        }
+      ],
+      "misconception": "More logs or more checks automatically make a result more trustworthy. Unrelated evidence can expose private detail while still failing to test the important claim.",
+      "takeaway": "State the claim, choose a check with the same scope, and keep evidence no broader than the decision requires."
+    },
+    {
+      "id": "memory-has-warm-and-cold-data",
+      "dayOffset": 44,
+      "title": "Memory has warm and cold data",
+      "deck": "Not every piece of an open workload needs the same kind of attention.",
+      "readMinutes": 3,
+      "summary": "Some data is used repeatedly and benefits from staying close to the processor; other data can wait until it is needed. The warm-and-cold distinction helps explain why systems keep caches and why an inactive app can still have a smaller memory cost than its full contents would suggest.",
+      "concepts": [
+        {
+          "term": "Warm data",
+          "analogy": "Tools already laid out for the next step",
+          "definition": "Data that a current workload is likely to use soon or repeatedly.",
+          "example": "The visible portion of a working document may be warmer than an unopened section."
+        },
+        {
+          "term": "Cold data",
+          "analogy": "Supplies stored on a high shelf",
+          "definition": "Data that is not currently needed and can wait before being brought close to active work.",
+          "example": "An inactive tab may have much of its state kept out of the immediate working set."
+        },
+        {
+          "term": "Locality",
+          "analogy": "Keeping errands in the same neighborhood",
+          "definition": "The tendency for a workload to reuse nearby or recently used data.",
+          "example": "Editing one part of a file repeatedly benefits from keeping related data close together."
+        }
+      ],
+      "misconception": "An app’s total file size tells you exactly how much memory it needs right now. Active use, access patterns, and shared data change the working set.",
+      "takeaway": "Ask which data is active, which can wait, and how the workload moves between them before judging memory use."
+    },
+    {
+      "id": "storage-counts-files-as-well-as-bytes",
+      "dayOffset": 45,
+      "title": "Storage counts files as well as bytes",
+      "deck": "A folder with many small items can behave differently from one large file.",
+      "readMinutes": 3,
+      "summary": "Storage reports emphasize bytes, but file count and directory structure also affect indexing, backup traversal, and everyday navigation. This does not make file count a replacement for size; it adds another clue when a folder feels cumbersome despite not being the largest one.",
+      "concepts": [
+        {
+          "term": "File count",
+          "analogy": "The number of boxes in a room",
+          "definition": "How many separate filesystem items a folder or tree contains.",
+          "example": "A source tree with many tiny generated files can be slower to inspect than one archive of similar total size."
+        },
+        {
+          "term": "Metadata operation",
+          "analogy": "Checking each label before moving a shipment",
+          "definition": "Work involving names, dates, permissions, and locations rather than file contents alone.",
+          "example": "A backup tool may need to visit many file entries even when each file is small."
+        },
+        {
+          "term": "Directory tree",
+          "analogy": "A filing cabinet with nested drawers",
+          "definition": "The hierarchy of folders and files used to organize a filesystem.",
+          "example": "Deep generated nesting can make ownership and cleanup scope harder to see."
+        }
+      ],
+      "misconception": "A folder with fewer bytes is always easier for every tool to handle. Many entries and deep nesting can create work that a byte total does not show.",
+      "takeaway": "Use bytes to understand capacity, and use file count and structure when diagnosing indexing, backup, or navigation friction."
+    },
+    {
+      "id": "performance-can-benefit-from-batching",
+      "dayOffset": 46,
+      "title": "Performance can benefit from batching",
+      "deck": "Doing related small actions together can change the cost of the whole trip.",
+      "readMinutes": 4,
+      "summary": "Repeated small operations can spend time on setup, handoff, or waiting between each item. Batching combines related work so that overhead is paid less often. The tradeoff is that a large batch can delay feedback or use more memory, so the right size depends on the task.",
+      "concepts": [
+        {
+          "term": "Batching",
+          "analogy": "Taking one full shopping trip instead of many single-item trips",
+          "definition": "Grouping related operations so shared setup or transfer work happens fewer times.",
+          "example": "Processing several small files in one command can reduce repeated startup overhead."
+        },
+        {
+          "term": "Overhead",
+          "analogy": "The time spent opening the shop before each sale",
+          "definition": "Work required to start, coordinate, or finish an operation beyond its main useful result.",
+          "example": "A request may have a fixed connection cost before it transfers its actual data."
+        },
+        {
+          "term": "Feedback delay",
+          "analogy": "Waiting for the whole tray before tasting one cookie",
+          "definition": "The time between starting grouped work and seeing a useful partial or final result.",
+          "example": "A very large batch may use fewer startups but make an error harder to notice early."
+        }
+      ],
+      "misconception": "A bigger batch is always faster. Batching can increase memory use, delay feedback, and make a failure harder to isolate.",
+      "takeaway": "Compare grouped and individual work on the real task, then choose a batch size that balances overhead with timely feedback."
+    },
+    {
+      "id": "backups-need-readable-restore-points",
+      "dayOffset": 47,
+      "title": "Backups need readable restore points",
+      "deck": "A preserved copy is easier to use when its time and contents are clear.",
+      "readMinutes": 3,
+      "summary": "When several copies exist, a vague label can turn recovery into guesswork. A restore point should tell you roughly when it was made, what it contains, and how it differs from nearby copies. Clear names reduce the chance of restoring the wrong state or overwriting a useful one.",
+      "concepts": [
+        {
+          "term": "Restore point",
+          "analogy": "A bookmark with a chapter title",
+          "definition": "A preserved state that can be selected as the source for recovery.",
+          "example": "A project copy labeled with its date and purpose is easier to distinguish from a test archive."
+        },
+        {
+          "term": "Retention label",
+          "analogy": "An expiry note on a pantry jar",
+          "definition": "Information that explains how long a copy should remain available or why it is kept.",
+          "example": "A release archive may be kept for a different reason from a short-lived daily copy."
+        },
+        {
+          "term": "Restore destination",
+          "analogy": "A spare table for unpacking a parcel",
+          "definition": "The separate location where recovered data is placed for inspection or use.",
+          "example": "Restoring into a new folder lets you compare the recovered document before replacing the current one."
+        }
+      ],
+      "misconception": "The newest copy is automatically the right copy. It may contain a mistake, be incomplete, or serve a different recovery purpose.",
+      "takeaway": "Label restore points by time and purpose, inspect them in a separate destination, and keep the original until recovery is understood."
+    },
+    {
+      "id": "project-dependencies-need-owners",
+      "dayOffset": 48,
+      "title": "Project dependencies need owners",
+      "deck": "A dependency is easier to maintain when someone can explain why it exists and how it is refreshed.",
+      "readMinutes": 4,
+      "summary": "Third-party packages, SDKs, and generated assets can become invisible project weight when nobody owns the decision around them. Recording the purpose, version rule, and update path makes upgrades safer and makes stale or duplicate copies easier to review.",
+      "concepts": [
+        {
+          "term": "Dependency",
+          "analogy": "A borrowed tool needed to finish the job",
+          "definition": "External code, data, or tooling that a project relies on to build or run.",
+          "example": "An application may depend on a library for parsing, rendering, or network access."
+        },
+        {
+          "term": "Lockfile",
+          "analogy": "A shopping list with exact brands and sizes",
+          "definition": "A file that records resolved dependency versions so installs can be reproduced more consistently.",
+          "example": "A clean checkout can use the lockfile to recreate the intended package set."
+        },
+        {
+          "term": "Ownership note",
+          "analogy": "A label naming who maintains a shared tool",
+          "definition": "A short explanation of why a dependency exists and who decides when it changes.",
+          "example": "A project note can explain which feature needs a package and what check should follow an upgrade."
+        }
+      ],
+      "misconception": "A dependency is harmless because it can be installed again. Version drift, unavailable sources, and incompatible updates can still make a rebuild different.",
+      "takeaway": "Record why a dependency exists, pin the intended version where appropriate, and name the check that follows an update."
+    },
+    {
+      "id": "privacy-includes-metadata",
+      "dayOffset": 49,
+      "title": "Privacy includes metadata",
+      "deck": "The label around a file can reveal as much as the file’s visible content.",
+      "readMinutes": 3,
+      "summary": "Names, paths, timestamps, permissions, and counts can describe a person’s work even when the content is never opened. A privacy-aware workflow treats metadata as data, too, and keeps only the fields needed for the decision.",
+      "concepts": [
+        {
+          "term": "Metadata",
+          "analogy": "The address label on a sealed parcel",
+          "definition": "Information that describes an item, such as its name, size, time, owner, or location.",
+          "example": "A folder name and modification time can reveal a project activity without exposing its files."
+        },
+        {
+          "term": "Inference",
+          "analogy": "Guessing the event from footprints outside",
+          "definition": "A conclusion someone can draw from details that were not intended to answer that question directly.",
+          "example": "A sequence of timestamps may suggest a person’s schedule even when each record looks ordinary."
+        },
+        {
+          "term": "Field selection",
+          "analogy": "Choosing only the columns needed on a form",
+          "definition": "The deliberate choice of which data fields a workflow will read, retain, or share.",
+          "example": "A dashboard may need a category count but not the original path or exact time."
+        }
+      ],
+      "misconception": "A workflow is private because it never reads file contents. Metadata can still expose identity, timing, location, or habits.",
+      "takeaway": "Review names, paths, times, and counts as carefully as content, and omit fields that do not change the decision."
+    },
+    {
+      "id": "agent-work-separates-observation-and-action",
+      "dayOffset": 50,
+      "title": "Agent work separates observation and action",
+      "deck": "Knowing what is present and deciding what to change are different steps.",
+      "readMinutes": 4,
+      "summary": "A safe workflow first gathers enough evidence to describe the current state, then applies a narrowly authorized change, and finally checks the result. Keeping those phases distinct makes it easier to see what the system was like before the action and what the action actually changed.",
+      "concepts": [
+        {
+          "term": "Observation",
+          "analogy": "Taking a photograph before moving furniture",
+          "definition": "A read-only description of the current state or evidence.",
+          "example": "A storage scan can record category sizes before any cleanup is attempted."
+        },
+        {
+          "term": "Authorization boundary",
+          "analogy": "A fence around the approved garden bed",
+          "definition": "The explicit limit on which actions and targets a task may affect.",
+          "example": "A safe routine can allow rebuildable caches while excluding personal files and source code."
+        },
+        {
+          "term": "Postcondition",
+          "analogy": "Checking the room after the furniture move",
+          "definition": "A property that should be true after the authorized action completes.",
+          "example": "A post-cleanup scan can confirm the receipt and show that review-only categories remain present."
+        }
+      ],
+      "misconception": "A plausible guess about the state is enough to justify the action. Without an observation and a boundary, a helpful-looking change can affect the wrong target.",
+      "takeaway": "Observe first, name the authorization boundary, act once, and verify the postcondition."
+    },
+    {
+      "id": "memory-has-a-background-cost",
+      "dayOffset": 51,
+      "title": "Background work still has a cost",
+      "deck": "Quiet helpers can compete with the task you can see.",
+      "readMinutes": 3,
+      "summary": "Syncing, indexing, backups, and updates often run without a visible window. They can use memory, processor time, storage activity, or network capacity while a foreground task is waiting. Recognizing background work helps explain why the same action can feel different at different times.",
+      "concepts": [
+        {
+          "term": "Background activity",
+          "analogy": "A kitchen preparing ingredients while the dining room is open",
+          "definition": "System or app work that continues while another task is in the foreground.",
+          "example": "A search index can update while you continue editing a note."
+        },
+        {
+          "term": "Contention",
+          "analogy": "Two people reaching for the same narrow doorway",
+          "definition": "Competition between workloads for a shared resource.",
+          "example": "A backup and a video export may contend for storage bandwidth."
+        },
+        {
+          "term": "Quiet period",
+          "analogy": "A time when the workshop is between deliveries",
+          "definition": "A period chosen to reduce unrelated activity while a task is observed.",
+          "example": "A repeatable comparison may be easier when scheduled outside a known indexing window."
+        }
+      ],
+      "misconception": "If no window is visible, no other work is using the device. Background activity can be real without being foregrounded.",
+      "takeaway": "When timing matters, note background activity and compare the same task during a reasonably quiet period."
+    },
+    {
+      "id": "storage-recovery-can-be-temporary",
+      "dayOffset": 52,
+      "title": "Recovered storage can be temporary",
+      "deck": "Free space is a state that can change again as tools rebuild their working data.",
+      "readMinutes": 4,
+      "summary": "Removing rebuildable data can create breathing room, but the next build, launch, or sync may recreate part of it. A cleanup is easier to evaluate when the receipt is compared with later snapshots, so regrowth becomes information instead of a surprise.",
+      "concepts": [
+        {
+          "term": "Regrowth",
+          "analogy": "A lawn growing back after mowing",
+          "definition": "The return or increase of generated data after it was removed.",
+          "example": "A build cache can grow again after a project is compiled on a fresh machine."
+        },
+        {
+          "term": "Snapshot",
+          "analogy": "A dated photograph of the room",
+          "definition": "A measurement captured at a particular time for later comparison.",
+          "example": "A daily storage snapshot can show whether a cleared category stays small or returns quickly."
+        },
+        {
+          "term": "Steady state",
+          "analogy": "The water level after the faucet and drain balance",
+          "definition": "A recurring range a system tends to return to under similar work.",
+          "example": "A project may settle into a familiar cache size after several normal builds."
+        }
+      ],
+      "misconception": "The space reclaimed immediately after cleanup is a permanent reduction. Rebuildable data may return because the work that needs it returned.",
+      "takeaway": "Record the cleanup, watch later snapshots, and judge storage pressure by the trend rather than one moment."
+    },
+    {
+      "id": "performance-is-a-responsiveness-contract",
+      "dayOffset": 53,
+      "title": "Performance is a responsiveness contract",
+      "deck": "People need feedback while work is happening, not only a fast final number.",
+      "readMinutes": 4,
+      "summary": "A task can finish quickly and still feel poor if the interface stops acknowledging input. Responsiveness is about the conversation between a person and a system: notice the action, show progress when useful, and complete the work without making the user guess whether anything happened.",
+      "concepts": [
+        {
+          "term": "Responsiveness",
+          "analogy": "A person nodding to show they heard you",
+          "definition": "How quickly and clearly a system acknowledges an input.",
+          "example": "A button can respond immediately with a state change even if the final operation continues."
+        },
+        {
+          "term": "Progress feedback",
+          "analogy": "A delivery tracker on a long trip",
+          "definition": "Information that shows ongoing work is active and what remains understandable.",
+          "example": "A progress state can distinguish a slow operation from an unresponsive one."
+        },
+        {
+          "term": "Completion latency",
+          "analogy": "The time until the parcel arrives",
+          "definition": "The delay between starting an operation and receiving its completed result.",
+          "example": "An export can acknowledge the request quickly while its completion still takes time."
+        }
+      ],
+      "misconception": "Responsiveness and total completion time are the same thing. Fast acknowledgement can improve trust even when the underlying work cannot finish immediately.",
+      "takeaway": "Measure both acknowledgement and completion, then give the person clear feedback during unavoidable waits."
+    },
+    {
+      "id": "backups-test-the-inconvenient-path",
+      "dayOffset": 54,
+      "title": "Backups test the inconvenient path",
+      "deck": "The recovery step that is easiest to ignore is often the one worth rehearsing.",
+      "readMinutes": 4,
+      "summary": "A happy-path backup check can miss the conditions that make recovery difficult: a different machine, a missing account, an old version, or a single important file. A small rehearsal of the awkward step exposes unclear instructions while the original data is still available.",
+      "concepts": [
+        {
+          "term": "Recovery rehearsal",
+          "analogy": "A fire drill before the alarm",
+          "definition": "A controlled practice of recovering a limited item or state from a preserved copy.",
+          "example": "Restore one ordinary project file to a separate destination and open it."
+        },
+        {
+          "term": "Access dependency",
+          "analogy": "The key needed to open the emergency cabinet",
+          "definition": "An account, credential, device, or permission required before recovery can begin.",
+          "example": "A backup may be intact but unusable if nobody knows which account can reach it."
+        },
+        {
+          "term": "Recovery gap",
+          "analogy": "A missing plank in a bridge",
+          "definition": "A weakness that prevents a preserved copy from becoming usable recovered data.",
+          "example": "An undocumented encryption key or unavailable application can create a recovery gap."
+        }
+      ],
+      "misconception": "A backup is validated because its job completed without an error. The real test includes access, selection, restoration, and opening the recovered result.",
+      "takeaway": "Rehearse one inconvenient recovery step, record what was unclear, and improve the procedure while the source remains safe."
+    },
+    {
+      "id": "clean-checkouts-clarify-projects",
+      "dayOffset": 55,
+      "title": "Clean checkouts clarify projects",
+      "deck": "A fresh rebuild can separate source problems from local residue.",
+      "readMinutes": 4,
+      "summary": "Local projects accumulate caches, generated output, and machine-specific settings. A clean checkout or clean build removes some of that history and asks whether the documented source is sufficient. It is a diagnostic tool, not a reason to delete a working environment without a recovery plan.",
+      "concepts": [
+        {
+          "term": "Clean checkout",
+          "analogy": "Cooking from a new copy of the recipe",
+          "definition": "A project working tree created from the recorded source without relying on old local output.",
+          "example": "A clean checkout can reveal that a build depends on an undocumented local file."
+        },
+        {
+          "term": "Reproducibility",
+          "analogy": "Getting the same meal from the same recipe",
+          "definition": "The ability to recreate a result from the stated inputs and steps.",
+          "example": "A documented dependency set makes a fresh build more reproducible than a machine-specific setup."
+        },
+        {
+          "term": "Local residue",
+          "analogy": "Old ingredients left on the counter",
+          "definition": "Generated or machine-specific state left by earlier work that is not part of the durable source.",
+          "example": "A stale generated file can hide a missing source configuration until a clean build is attempted."
+        }
+      ],
+      "misconception": "A clean checkout is always safe to perform immediately. It can expose missing documentation and may require network access, credentials, or time to rebuild.",
+      "takeaway": "Use clean builds as diagnostics, keep the working copy recoverable, and document every input the fresh result needs."
+    },
+    {
+      "id": "privacy-gives-summaries-a-scope",
+      "dayOffset": 56,
+      "title": "Privacy gives summaries a scope",
+      "deck": "A summary is safer when its audience, purpose, and detail are explicit.",
+      "readMinutes": 3,
+      "summary": "Aggregation reduces detail, but it does not remove the need for boundaries. A useful summary says what period and population it describes, who needs it, and what it intentionally leaves out. Those limits help readers avoid treating a narrow pattern as a complete personal record.",
+      "concepts": [
+        {
+          "term": "Aggregation scope",
+          "analogy": "The frame around a group photo",
+          "definition": "The defined time range, population, and grouping rules behind an aggregate result.",
+          "example": "A fourteen-day category count does not describe every task or every month."
+        },
+        {
+          "term": "Audience boundary",
+          "analogy": "A room with a named guest list",
+          "definition": "The limit on who should receive or interpret a report.",
+          "example": "A private dashboard may be appropriate for an owner but not for a public status page."
+        },
+        {
+          "term": "Omission note",
+          "analogy": "A map showing the roads it does not cover",
+          "definition": "A plain statement of important details the summary intentionally does not include.",
+          "example": "A workflow report can state that it excludes prompts, message bodies, secrets, and file contents."
+        }
+      ],
+      "misconception": "An aggregate number speaks for everything that happened. It only describes the records and scope used to produce it.",
+      "takeaway": "Name the scope, audience, and omissions so a useful summary does not become an overconfident personal profile."
+    },
+    {
+      "id": "agent-handoffs-need-a-next-check",
+      "dayOffset": 57,
+      "title": "Agent handoffs need a next check",
+      "deck": "A handoff is stronger when the next person knows how to resume and verify it.",
+      "readMinutes": 4,
+      "summary": "A handoff should carry the current state, the boundary that was protected, and the next check that matters. This keeps another person or agent from repeating exploration, guessing at unfinished work, or expanding scope simply because the stopping point was unclear.",
+      "concepts": [
+        {
+          "term": "Handoff note",
+          "analogy": "A trail marker left for the next hiker",
+          "definition": "A concise record of what was done, what remains, and what context is needed to continue.",
+          "example": "A note can identify the validated files, the comparison still needed, and the protected boundaries."
+        },
+        {
+          "term": "Resume point",
+          "analogy": "A bookmark placed at the next paragraph",
+          "definition": "The specific place and state from which follow-up work should begin.",
+          "example": "A task can resume at the post-change verification instead of repeating the initial scan."
+        },
+        {
+          "term": "Open question",
+          "analogy": "A labeled envelope waiting for an answer",
+          "definition": "A remaining uncertainty that needs evidence or a decision before the work can expand.",
+          "example": "A handoff can say that a review-only category needs a separate decision without touching it now."
+        }
+      ],
+      "misconception": "A long activity log is a good handoff. Volume can hide the current state, the protected boundary, and the one check that matters next.",
+      "takeaway": "Leave the current state, protected boundary, resume point, and next verification in a compact handoff note."
+    },
+    {
+      "id": "memory-working-set-needs-a-story",
+      "dayOffset": 58,
+      "title": "Memory needs a working-set story",
+      "deck": "A memory reading makes sense when you connect it to the work the system is keeping ready.",
+      "readMinutes": 4,
+      "summary": "Memory is not a simple empty-versus-full gauge. The useful question is which active pieces of work must stay quickly available, how much the system can compress, and whether it is repeatedly moving data to slower storage. A small working-set story turns a scary number into a testable explanation.",
+      "concepts": [
+        {
+          "term": "Working set",
+          "analogy": "The papers currently spread across a desk",
+          "definition": "The data and code an active workload needs to access frequently during a period of work.",
+          "example": "A browser with many live tabs and a video editor open at once has a larger working set than either app alone."
+        },
+        {
+          "term": "Compression",
+          "analogy": "Folding clothes before filling the suitcase",
+          "definition": "A technique that stores some in-memory data in a smaller form so more active work can fit in RAM.",
+          "example": "The system may compress inactive app data before it needs to use the SSD as overflow."
+        },
+        {
+          "term": "Page-out",
+          "analogy": "Moving a rarely used folder to a nearby cabinet",
+          "definition": "Moving a memory page from RAM to storage so RAM can serve other active work.",
+          "example": "If a background app is paged out, returning to it may take longer while its data comes back."
+        }
+      ],
+      "misconception": "A high memory-use percentage alone proves that the Mac is in trouble. The stronger signal is sustained pressure, heavy paging, or noticeable responsiveness problems during the workload.",
+      "takeaway": "Describe the active working set and watch pressure over time before deciding whether memory needs attention."
+    },
+    {
+      "id": "storage-needs-a-buffer",
+      "dayOffset": 59,
+      "title": "Free space needs a buffer",
+      "deck": "Headroom gives ordinary work somewhere to go when a task briefly gets larger.",
+      "readMinutes": 4,
+      "summary": "Free storage is not only a number to admire after cleanup. It is working room for updates, exports, temporary files, and the system's own housekeeping. Keeping a buffer makes normal changes less stressful, while a threshold gives you a prompt to inspect the trend without pretending it identifies the cause.",
+      "concepts": [
+        {
+          "term": "Headroom",
+          "analogy": "Empty seats kept for late arrivals",
+          "definition": "Capacity intentionally left available so ordinary work can handle temporary increases.",
+          "example": "A video export may need temporary working files even when the final video is smaller than the available space."
+        },
+        {
+          "term": "Threshold",
+          "analogy": "A fuel warning light",
+          "definition": "A chosen boundary that prompts attention when a resource gets close to a less comfortable range.",
+          "example": "A dashboard can flag a low free-space threshold so you compare recent snapshots before deciding what deserves review."
+        },
+        {
+          "term": "Margin",
+          "analogy": "Walking distance from the edge of a crowded platform",
+          "definition": "The amount of room between the current state and a meaningful limit.",
+          "example": "The same 5 GB change leaves a very different margin when free space starts at 100 GB versus 12 GB."
+        }
+      ],
+      "misconception": "Crossing a free-space threshold proves which folder caused the change or makes deletion safe. It is a signal to compare like-for-like readings and review approved evidence.",
+      "takeaway": "Keep a useful buffer, treat thresholds as prompts, and investigate the measured change before choosing a safe next action."
+    },
+    {
+      "id": "performance-needs-a-baseline",
+      "dayOffset": 60,
+      "title": "Performance needs a baseline",
+      "deck": "A baseline turns a vague feeling of slowness into a comparison you can repeat.",
+      "readMinutes": 4,
+      "summary": "Performance work becomes clearer when you first describe a normal run, then change one meaningful factor, and finally compare the same signal again. A baseline does not promise a perfect explanation, but it keeps impressions from becoming unsupported claims and helps a small experiment teach you something useful.",
+      "concepts": [
+        {
+          "term": "Baseline",
+          "analogy": "A starting line painted on a track",
+          "definition": "A recorded reference condition used to compare later behavior.",
+          "example": "Before changing a build setting, record how long the same clean build takes under the usual project conditions."
+        },
+        {
+          "term": "Controlled change",
+          "analogy": "Turning one tap while keeping the others still",
+          "definition": "An experiment that changes one relevant factor while keeping the comparison conditions as similar as practical.",
+          "example": "Compare two cache configurations with the same input, device state, and number of runs."
+        },
+        {
+          "term": "Repeatable signal",
+          "analogy": "A clock that shows the same time when checked the same way",
+          "definition": "A measurement that can be collected again using a defined procedure and unit.",
+          "example": "Use elapsed seconds for the same operation instead of relying only on whether it felt faster today."
+        }
+      ],
+      "misconception": "One faster run proves that a change improved performance. A single result can be noise, warm-up, or a different workload, so the comparison needs a defined baseline and repeatable conditions.",
+      "takeaway": "Record a baseline, change one relevant factor, and repeat the same measurement before drawing a performance conclusion."
+    },
+    {
+      "id": "backups-need-a-recovery-window",
+      "dayOffset": 61,
+      "title": "Backups need a recovery window",
+      "deck": "A backup plan is easier to trust when you know how far back it can actually take you.",
+      "readMinutes": 4,
+      "summary": "A backup is useful when it covers the kind of mistake you are preparing for and can be restored within the time you need. Think about the last usable version, how long versions remain available, and whether a small restore check has confirmed the path. The exact schedule is a choice for the work, not a promise supplied by the word backup.",
+      "concepts": [
+        {
+          "term": "Recovery point",
+          "analogy": "A bookmark in the history of a notebook",
+          "definition": "The point in time represented by a copy that you could restore.",
+          "example": "A nightly backup can represent the previous evening's state, which may be enough for some work but not for every kind of change."
+        },
+        {
+          "term": "Retention window",
+          "analogy": "A shelf that holds only a chosen number of boxes",
+          "definition": "The period during which backup versions remain available for recovery.",
+          "example": "Keeping seven daily versions can help with a recent mistake while offering less protection for a problem discovered much later."
+        },
+        {
+          "term": "Restore test",
+          "analogy": "Trying the spare key before the door is urgent",
+          "definition": "A deliberate check that a backup can be found, opened, and used to recover something small.",
+          "example": "Restoring a test file or following a documented drill can reveal a missing permission or an unclear step before a real recovery."
+        }
+      ],
+      "misconception": "Having a recent backup automatically means every important change is protected and the copy will be easy to restore. Coverage, retention, and a tested recovery path still matter.",
+      "takeaway": "Choose the recovery window for the work, keep versions long enough for the likely mistake, and test a small restore path."
+    },
+    {
+      "id": "project-hygiene-needs-a-boundary",
+      "dayOffset": 62,
+      "title": "Project hygiene needs a boundary",
+      "deck": "A clear line between source, output, and scratch work makes a project easier to resume.",
+      "readMinutes": 4,
+      "summary": "A project is easier to understand when its essential source files are distinct from generated results and temporary experiments. That boundary helps you decide what must be preserved, what can be rebuilt, and what another person or agent needs to continue without guessing.",
+      "concepts": [
+        {
+          "term": "Source file",
+          "analogy": "The recipe and ingredients",
+          "definition": "A canonical input, decision, or configuration used to recreate the intended result.",
+          "example": "Application code, a lockfile, and a documented configuration can explain how to rebuild a project."
+        },
+        {
+          "term": "Generated output",
+          "analogy": "The baked loaf made from the recipe",
+          "definition": "A result produced from source files that can usually be recreated by running the right process.",
+          "example": "A build folder or compiled bundle may be useful for testing but should not replace the source of truth."
+        },
+        {
+          "term": "Scratch space",
+          "analogy": "The workbench beside the kitchen",
+          "definition": "Temporary files and experiments that support a task without being part of the durable project record.",
+          "example": "A one-off export or a local test fixture can stay outside the handoff until it is either documented or discarded."
+        }
+      ],
+      "misconception": "A smaller project folder is automatically a healthier project. Removing generated results or undocumented experiments can erase useful context or make the next rebuild harder.",
+      "takeaway": "Mark what is source, generated, and scratch; preserve the source of truth and leave a short handoff note for anything another person must reproduce."
+    },
+    {
+      "id": "privacy-needs-a-retention-window",
+      "dayOffset": 63,
+      "title": "Privacy needs a retention window",
+      "deck": "Keeping less data means deciding how long a useful record should remain.",
+      "readMinutes": 4,
+      "summary": "A record can be private today and still create future risk if it is kept longer or in more detail than its job requires. A retention window names how long a useful record should remain, while aggregation can preserve a trend without preserving the underlying activity. The goal is a deliberate, limited record rather than automatic erasure or permanent collection.",
+      "concepts": [
+        {
+          "term": "Retention window",
+          "analogy": "A library loan period",
+          "definition": "The chosen period for keeping a record before it is reviewed, reduced, or removed.",
+          "example": "A model dashboard might keep daily storage totals for a 90-day review window, then remove older totals when they no longer serve that purpose."
+        },
+        {
+          "term": "Data minimization",
+          "analogy": "Packing only the tools needed for one repair",
+          "definition": "Collecting and keeping only the data needed for a stated task.",
+          "example": "A workflow summary can count task records without keeping the prompts, message bodies, or file contents."
+        },
+        {
+          "term": "Aggregation",
+          "analogy": "A weather report instead of every raindrop",
+          "definition": "Combining detailed observations into a less identifying summary.",
+          "example": "A report can show how many tasks occurred in a period without listing the titles or words from those tasks."
+        }
+      ],
+      "misconception": "Private means that data is harmless to keep forever, while deletion is always the safest answer. A record can be useful for a limited purpose, and keeping more detail or more history than needed can increase exposure.",
+      "takeaway": "Name the purpose, keep the smallest useful summary, and set a review point for how long it should remain."
+    },
+    {
+      "id": "agent-work-needs-a-small-proof",
+      "dayOffset": 64,
+      "title": "Agent work needs a small proof",
+      "deck": "A compact verification step makes delegated work easier to trust and resume.",
+      "readMinutes": 4,
+      "summary": "When an agent changes something, the most useful handoff is not a long account of every action. It is a clear result, the boundary that was respected, and one small check that supports the result. This keeps follow-up focused and makes it easier to spot when a task needs another look.",
+      "concepts": [
+        {
+          "term": "Proof point",
+          "analogy": "A receipt attached to a delivered package",
+          "definition": "A small piece of evidence that a stated result or constraint was checked.",
+          "example": "A validation command passing can support a claim that a data-file change still matches the project schema."
+        },
+        {
+          "term": "Scope boundary",
+          "analogy": "A fence around the part of a garden being tended",
+          "definition": "The explicit limit on which files, systems, or decisions a task is allowed to affect.",
+          "example": "A cleanup task can name its approved rebuildable targets while leaving source code and personal files outside the work."
+        },
+        {
+          "term": "Resume note",
+          "analogy": "A bookmark with a note about the next paragraph",
+          "definition": "A short handoff statement that identifies the current state and the next useful check.",
+          "example": "A note can say that the safe scan finished, the dashboard files were refreshed, and the next run should compare the next daily snapshot."
+        }
+      ],
+      "misconception": "More activity detail makes agent work more trustworthy. A long log can still hide what changed, what was protected, and how to verify the result.",
+      "takeaway": "State the result, name the protected boundary, and leave one small proof point and next check for whoever resumes the work."
+    },
+    {
+      "id": "memory-needs-a-foreground-budget",
+      "dayOffset": 65,
+      "title": "Memory needs a foreground budget",
+      "deck": "The task in front of you shares the machine with work happening behind the scenes.",
+      "readMinutes": 4,
+      "summary": "Memory use is shaped not only by the app you opened but also by the background work sharing the machine. A useful check names the foreground task, notices the largest competing work, and compares the same condition after one change. This gives you a clearer next step than closing things at random.",
+      "concepts": [
+        {
+          "term": "Foreground workload",
+          "analogy": "The main customer at a counter",
+          "definition": "The app or task you are actively trying to keep responsive right now.",
+          "example": "When editing a photo, the editor and the image you are working on form the foreground workload."
+        },
+        {
+          "term": "Background workload",
+          "analogy": "Orders waiting behind the counter",
+          "definition": "Ongoing work that is not the current interaction but still uses system resources.",
+          "example": "A sync job, indexer, or project build can continue using memory while you work in another app."
+        },
+        {
+          "term": "Memory budget",
+          "analogy": "A tray with room reserved for the main order",
+          "definition": "A practical plan for leaving enough working memory for the task that matters most.",
+          "example": "Before starting a large export, pause an unneeded build and close only the largest unrelated workload."
+        }
+      ],
+      "misconception": "The number of open apps alone explains whether memory is under pressure. A small set of apps can hold large working sets, while background work and the current task also affect what the system must keep ready.",
+      "takeaway": "Name the foreground task, identify the biggest competing workload, and compare the same condition after one deliberate change."
+    },
+    {
+      "id": "storage-alerts-need-a-crossing",
+      "dayOffset": 66,
+      "title": "Storage alerts need a crossing",
+      "deck": "A threshold is useful when you know whether the reading just crossed it or has been there for a while.",
+      "readMinutes": 4,
+      "summary": "A low-space number deserves context. Compare today's reading with the previous daily snapshot and ask whether it newly crossed a threshold, stayed below it, or recovered above it. That distinction prevents a persistent condition from being reported as a new event and keeps attention on real changes.",
+      "concepts": [
+        {
+          "term": "Threshold",
+          "analogy": "A line painted across a trail",
+          "definition": "A chosen boundary at which a reading deserves a different kind of review or response.",
+          "example": "A storage policy can use 20 GB free or 15% available as a line for closer review."
+        },
+        {
+          "term": "Crossing",
+          "analogy": "Stepping through a doorway",
+          "definition": "A change from one side of a threshold to the other between two comparable readings.",
+          "example": "If free space was above 20 GB yesterday and below it today, the threshold was newly crossed."
+        },
+        {
+          "term": "Baseline",
+          "analogy": "The previous mark on a ruler",
+          "definition": "A reference reading used to understand the current value and its change.",
+          "example": "The previous distinct daily snapshot can serve as today's baseline for the free-space difference."
+        }
+      ],
+      "misconception": "Any reading below an alert threshold is a new alert. If the device was already below it, the useful new information may be the direction and size of change, not a newly crossed condition.",
+      "takeaway": "Compare today with the previous distinct reading, separate threshold crossings from persistent states, and describe the change before choosing a next check."
+    },
+    {
+      "id": "performance-needs-a-smallest-bottleneck",
+      "dayOffset": 67,
+      "title": "Performance needs a smallest bottleneck",
+      "deck": "The slowest part of a workflow often sets the pace for everything around it.",
+      "readMinutes": 4,
+      "summary": "When a task feels slow, start by finding the step that is limiting progress right now. A faster processor, a larger cache, or a more elaborate setup may not help if the real wait is a network response, one busy disk, or a single serial step. Name the repeated wait, change one thing, and measure the same step again.",
+      "concepts": [
+        {
+          "term": "Bottleneck",
+          "analogy": "The narrow neck of a bottle",
+          "definition": "The part of a process that limits how quickly the whole process can move.",
+          "example": "A build with many quick tasks can still feel slow when one signing step waits on a single device or service."
+        },
+        {
+          "term": "Latency",
+          "analogy": "The pause before a reply",
+          "definition": "The time between asking for an operation and receiving its first useful response.",
+          "example": "A file browser can feel unresponsive when each folder change waits on a remote location, even if later transfers are fast."
+        },
+        {
+          "term": "Throughput",
+          "analogy": "How many boxes pass a loading dock per hour",
+          "definition": "The amount of work completed over a period of time.",
+          "example": "A photo export may have good throughput once it starts while still having noticeable latency before the first preview appears."
+        }
+      ],
+      "misconception": "The most visible resource is always the bottleneck. High CPU, memory use, or disk activity can be a consequence of useful work while the real limit sits in a different step.",
+      "takeaway": "Describe the repeated wait, identify the step that limits progress, change one variable, and compare the same measure again."
+    },
+    {
+      "id": "backups-need-a-separate-destination",
+      "dayOffset": 68,
+      "title": "Backups need a separate destination",
+      "deck": "A second copy helps only when it is separate enough from the original problem.",
+      "readMinutes": 4,
+      "summary": "A backup is more useful when it has a different failure path from the data it protects. A second folder on the same disk may help with an accidental edit, but it cannot help if that disk fails. Think about what could go wrong, place the copy where that problem does not reach both versions, and check that the copy can be opened.",
+      "concepts": [
+        {
+          "term": "Backup copy",
+          "analogy": "A spare key kept outside the locked room",
+          "definition": "A separate copy of data kept so it can be recovered after loss, damage, or an unwanted change.",
+          "example": "A project copy on an external drive can help if the working drive is damaged."
+        },
+        {
+          "term": "Failure path",
+          "analogy": "The route a leak takes through a building",
+          "definition": "The chain of shared conditions that can cause multiple copies or systems to fail together.",
+          "example": "Two folders on one drive share the drive's failure path, while a copy on another device may avoid it."
+        },
+        {
+          "term": "Restore check",
+          "analogy": "Trying the spare key before an emergency",
+          "definition": "A small test that confirms a backup exists in a usable form and can produce the needed data.",
+          "example": "Opening a backed-up document or restoring a small test folder can reveal whether the copy is readable."
+        }
+      ],
+      "misconception": "Having two copies automatically means the data is safely backed up. If both copies share the same disk, account, location, or untested format, one problem can still affect both.",
+      "takeaway": "Name the failure you are guarding against, keep a copy outside that failure path, and perform a small restore check."
+    },
+    {
+      "id": "project-hygiene-needs-a-rebuild-note",
+      "dayOffset": 69,
+      "title": "Project hygiene needs a rebuild note",
+      "deck": "A short recipe makes generated work easier to remove, replace, and trust.",
+      "readMinutes": 4,
+      "summary": "Generated files are easier to manage when a project explains how to recreate them. A small rebuild note can name the required tools, the expected command, and the output location. That context turns an opaque folder into a replaceable result and helps the next person—or your future self—tell safe cleanup from lost work.",
+      "concepts": [
+        {
+          "term": "Rebuild note",
+          "analogy": "A recipe taped inside the workshop door",
+          "definition": "A brief record of the inputs and steps needed to recreate a generated result.",
+          "example": "A project note can say which command recreates a preview bundle and where that bundle appears."
+        },
+        {
+          "term": "Prerequisite",
+          "analogy": "The ingredients measured before cooking",
+          "definition": "A tool, dependency, setting, or input that must be available before a rebuild can succeed.",
+          "example": "A particular runtime version or environment variable may be required before a local build works."
+        },
+        {
+          "term": "Replaceable output",
+          "analogy": "A photocopy that can be made again from the original page",
+          "definition": "Generated data that can be safely recreated from preserved source files and known steps.",
+          "example": "A compiled preview can be removed when its source and rebuild instructions are still available."
+        }
+      ],
+      "misconception": "A folder is not safely disposable just because it looks generated. Without preserved inputs and a working rebuild path, deleting it may turn a replaceable result into lost work.",
+      "takeaway": "Before clearing generated project data, confirm the source, prerequisites, command, and output location are documented well enough to rebuild it."
+    },
+    {
+      "id": "privacy-needs-a-purpose",
+      "dayOffset": 70,
+      "title": "Privacy starts with a purpose",
+      "deck": "A clear reason helps you choose what a useful record should leave out.",
+      "readMinutes": 4,
+      "summary": "Privacy is easier to protect when a record has a specific job. Start by naming the decision the record should support, then keep only the smallest details needed for that decision. A useful aggregate can show a trend without preserving the activity that produced every point.",
+      "concepts": [
+        {
+          "term": "Purpose limitation",
+          "analogy": "Packing for one short trip",
+          "definition": "Collecting and using information only for a stated, appropriate purpose.",
+          "example": "A storage dashboard can keep category totals for trend review without keeping filenames or document text."
+        },
+        {
+          "term": "Minimization",
+          "analogy": "Using the smallest useful measuring cup",
+          "definition": "Choosing the least amount of information that can still support the task.",
+          "example": "A workflow report can count task records and dates while omitting prompts, message bodies, and secrets."
+        },
+        {
+          "term": "Aggregate",
+          "analogy": "A class attendance total instead of every student's route",
+          "definition": "A combined summary that preserves a useful pattern while reducing detail about individual events.",
+          "example": "A weekly task count can reveal activity volume without listing the individual tasks."
+        }
+      ],
+      "misconception": "Keeping data local automatically makes every detail safe to retain. Local data still deserves a purpose, a limited scope, and a plan for how long it should remain.",
+      "takeaway": "Name the decision a record supports, keep the smallest useful summary, and leave out details that do not serve that purpose."
+    },
+    {
+      "id": "agent-work-needs-a-checkpoint",
+      "dayOffset": 71,
+      "title": "Agent work needs a checkpoint",
+      "deck": "A small handoff marker keeps a long task understandable when work pauses.",
+      "readMinutes": 4,
+      "summary": "Agent work can span many steps, but a useful checkpoint does not need to list every thought or action. It records the current result, the boundary that still matters, and the next verification step. That compact marker makes a paused task easier to resume and review.",
+      "concepts": [
+        {
+          "term": "Checkpoint",
+          "analogy": "A trail marker at the last safe crossing",
+          "definition": "A brief record of the current state that supports a later continuation or review.",
+          "example": "A checkpoint can say that the approved files were refreshed, validation is next, and source files were not touched."
+        },
+        {
+          "term": "Acceptance check",
+          "analogy": "Trying the door before declaring the room finished",
+          "definition": "A small test tied directly to the intended result or constraint.",
+          "example": "Running the project validator checks that a dashboard update still follows its schema."
+        },
+        {
+          "term": "Handoff",
+          "analogy": "Passing a baton with the next runner's lane visible",
+          "definition": "A concise transfer of status, evidence, and next action to another person or process.",
+          "example": "A handoff can identify the changed report, the passing check, and the one comparison the next run should make."
+        }
+      ],
+      "misconception": "A longer activity log is automatically a better handoff. Detail without a clear result, boundary, and next check can make the important information harder to find.",
+      "takeaway": "Leave a checkpoint with the result, the protected boundary, one proof point, and the smallest useful next action."
+    },
+    {
+      "id": "memory-needs-a-smaller-working-set",
+      "dayOffset": 72,
+      "title": "Memory benefits from a smaller working set",
+      "deck": "Reducing what must stay ready can help the current task remain responsive.",
+      "readMinutes": 4,
+      "summary": "When memory pressure persists, the useful question is which work must remain ready right now. Keep the foreground task's data close, then pause or close the largest unrelated work only when that change is safe. Comparing the same workload afterward gives a better signal than chasing an empty-memory number.",
+      "concepts": [
+        {
+          "term": "Working set",
+          "analogy": "Tools spread across today's workbench",
+          "definition": "The data and code an active task needs readily available during a period of work.",
+          "example": "A large image editor, its source files, and an export preview can form the working set for a design task."
+        },
+        {
+          "term": "Contention",
+          "analogy": "Two people reaching for the same tool",
+          "definition": "Competition between tasks for the same limited system resource.",
+          "example": "A project build and a video export may contend for memory while both keep large intermediate data ready."
+        },
+        {
+          "term": "Controlled reduction",
+          "analogy": "Putting away one tool before opening another",
+          "definition": "Reducing resource demand through one deliberate, reversible change.",
+          "example": "Pausing an unneeded build before a large export is a controlled reduction that can be tested and reversed."
+        }
+      ],
+      "misconception": "Closing many small apps is always the best memory fix. The largest working set or background job may matter more, and random changes make it harder to learn what helped.",
+      "takeaway": "Protect the foreground task, identify the biggest competing working set, change one thing, and compare the same condition again."
+    },
+    {
+      "id": "storage-growth-needs-a-trail",
+      "dayOffset": 73,
+      "title": "Storage growth needs a trail",
+      "deck": "A sequence of comparable readings explains change better than one impressive total.",
+      "readMinutes": 4,
+      "summary": "Storage diagnosis becomes clearer when each reading has the same lens: the same categories, units, and approximate timing. The difference between two readings shows what moved, while the category breakdown suggests where to look next. A single large total cannot tell you whether growth is new or longstanding.",
+      "concepts": [
+        {
+          "term": "Delta",
+          "analogy": "The distance between two marks on a ruler",
+          "definition": "The numerical change between a current measurement and its reference measurement.",
+          "example": "A category that grows from 8 GB to 10 GB has a positive delta of 2 GB."
+        },
+        {
+          "term": "Attribution",
+          "analogy": "Sorting a receipt into the right shopping bags",
+          "definition": "Assigning measured change to the category or source that best explains it.",
+          "example": "A repeatable scan can attribute growth to project data, app data, or rebuildable caches without inspecting file contents."
+        },
+        {
+          "term": "Comparable baseline",
+          "analogy": "Using the same starting line for every race",
+          "definition": "A prior measurement collected with sufficiently similar rules to support a fair comparison.",
+          "example": "The previous distinct daily snapshot is a better baseline than an older reading made with different scan coverage."
+        }
+      ],
+      "misconception": "The largest category today is automatically the cause of a recent storage problem. Size and growth are different questions, and only a comparable baseline reveals the change.",
+      "takeaway": "Keep the scan lens consistent, compare deltas, and follow the categories with meaningful new growth rather than the categories that are merely large."
+    },
+    {
+      "id": "performance-needs-a-repeatable-test",
+      "dayOffset": 74,
+      "title": "Performance needs a repeatable test",
+      "deck": "A small controlled comparison separates a real improvement from a lucky run.",
+      "readMinutes": 4,
+      "summary": "A workflow can feel faster for many reasons, including a warm cache, a quieter machine, or a smaller input. A repeatable test keeps the task, input, and measurement close enough that one change can be judged fairly. The goal is not perfect laboratory precision; it is a trustworthy comparison.",
+      "concepts": [
+        {
+          "term": "Benchmark",
+          "analogy": "A marked stretch of road for testing a car",
+          "definition": "A repeatable workload and measurement used to compare performance.",
+          "example": "Running the same build command on the same project before and after one change creates a simple benchmark."
+        },
+        {
+          "term": "Control",
+          "analogy": "Keeping the other knobs still",
+          "definition": "A condition held steady so the effect of one chosen change is easier to see.",
+          "example": "Using the same input files and build mode controls the comparison when testing a tool change."
+        },
+        {
+          "term": "Variance",
+          "analogy": "Small waves around an average waterline",
+          "definition": "Natural variation between repeated measurements of the same process.",
+          "example": "A few seconds of difference across identical runs may be ordinary variance rather than a meaningful regression."
+        }
+      ],
+      "misconception": "One faster run proves that a change improved performance. A single result can be noise, so repeat the same test and look for a consistent direction.",
+      "takeaway": "Choose one workload, hold the important conditions steady, repeat the measurement, and change one variable at a time."
+    },
+    {
+      "id": "backups-need-a-recovery-map",
+      "dayOffset": 75,
+      "title": "Backups need a recovery map",
+      "deck": "A backup is useful when you know what it can restore and how long that path takes.",
+      "readMinutes": 4,
+      "summary": "A backup plan becomes practical when it names the data to recover, the copy to use, and the steps that connect the two. Different failures call for different recovery paths: a deleted file, a damaged drive, and a lost account do not all use the same copy. A small test can reveal missing instructions before an emergency.",
+      "concepts": [
+        {
+          "term": "Recovery point",
+          "analogy": "The last saved page in a notebook",
+          "definition": "The latest moment in time represented by a usable backup copy.",
+          "example": "A nightly backup may restore yesterday's project but not edits made this morning."
+        },
+        {
+          "term": "Recovery time",
+          "analogy": "How long it takes to find the spare key and open the door",
+          "definition": "The time needed to make the required data usable again after a failure.",
+          "example": "Restoring one document may take minutes, while rebuilding a full workstation can take much longer."
+        },
+        {
+          "term": "Restore sequence",
+          "analogy": "A checklist for rebuilding a campsite",
+          "definition": "The ordered steps used to retrieve data, restore prerequisites, and verify the result.",
+          "example": "A restore sequence may recover the project, reinstall its dependencies, and then open a known test file."
+        }
+      ],
+      "misconception": "A backup is proven by the fact that a copy exists. Without knowing its recovery point, steps, and usability, the copy may not meet the need when something fails.",
+      "takeaway": "Name the failure you are preparing for, identify the recovery point and time you need, and test a small restore sequence."
+    },
+    {
+      "id": "projects-need-a-clean-boundary-daily",
+      "dayOffset": 76,
+      "title": "Project hygiene needs a clean boundary",
+      "deck": "Separate what you preserve, what you rebuild, and what you can safely discard.",
+      "readMinutes": 4,
+      "summary": "A project is easier to maintain when its durable source is clearly separated from local results. Marking that boundary helps you remove generated data without losing the recipe that creates it, and it gives another person a clearer starting point when the work needs to move or be rebuilt.",
+      "concepts": [
+        {
+          "term": "Retention boundary",
+          "analogy": "A labeled shelf in a workshop",
+          "definition": "An explicit rule that distinguishes files to preserve from files that may be recreated or removed.",
+          "example": "Source code and a lockfile stay on the preserve shelf while a local preview folder can be rebuilt."
+        },
+        {
+          "term": "Artifact manifest",
+          "analogy": "A packing list for finished pieces",
+          "definition": "A short record of which generated outputs exist, who uses them, and how they are recreated.",
+          "example": "A README can name the preview bundle, its build command, and the folder where the result appears."
+        },
+        {
+          "term": "Clean checkout",
+          "analogy": "A fresh workbench with only the materials on the plan",
+          "definition": "A project state recreated from its preserved source without relying on accidental local leftovers.",
+          "example": "A fresh clone should be able to install its documented dependencies and produce the expected build."
+        }
+      ],
+      "misconception": "A small project is automatically a well-organized project. Size does not show whether its source, generated outputs, and rebuild instructions are distinguishable.",
+      "takeaway": "Name the source of truth, list the outputs it creates, and check that a clean checkout can follow the rebuild path."
+    },
+    {
+      "id": "privacy-needs-a-stop-condition",
+      "dayOffset": 77,
+      "title": "Privacy needs a stop condition",
+      "deck": "A useful record also needs a boundary for when collection ends.",
+      "readMinutes": 4,
+      "summary": "Privacy is not only about what a record excludes at the start. It also depends on how long the record remains useful and what happens when its purpose ends. A clear stop condition keeps a helpful summary from quietly becoming a permanent history of activity.",
+      "concepts": [
+        {
+          "term": "Retention window",
+          "analogy": "A library loan period",
+          "definition": "The planned period during which information is kept because it still serves its stated purpose.",
+          "example": "A recent workflow count may need a few weeks of history, while older detail no longer supports the decision."
+        },
+        {
+          "term": "Sensitive field",
+          "analogy": "A name written on the outside of a package",
+          "definition": "A piece of information that can reveal more about a person, place, or activity than the task requires.",
+          "example": "A file path or message body may identify private work even when a simple count would be enough."
+        },
+        {
+          "term": "Deletion rule",
+          "analogy": "A calendar reminder to return the library book",
+          "definition": "A specific condition or time that says when data should be removed or reduced.",
+          "example": "A report can keep daily totals for trend review and drop older event-level records after the comparison window."
+        }
+      ],
+      "misconception": "Aggregate counts can never be sensitive. A summary can still reveal private activity when its scope, timing, or category is too specific for the purpose.",
+      "takeaway": "State the purpose, keep the least revealing useful fields, and define when the record should stop being retained."
+    },
+    {
+      "id": "agent-work-needs-a-narrow-boundary",
+      "dayOffset": 78,
+      "title": "Agent work benefits from a narrow task boundary",
+      "deck": "A clear scope protects both the result and the work around it.",
+      "readMinutes": 4,
+      "summary": "An agent can make progress faster when the task names its allowed surface and its protected edges. A narrow boundary does not mean ignoring useful context; it means separating the evidence needed for the decision from unrelated files, actions, or assumptions that could make the change harder to review.",
+      "concepts": [
+        {
+          "term": "Scope",
+          "analogy": "The marked area of a construction site",
+          "definition": "The files, systems, and actions that a task is allowed to affect.",
+          "example": "A dashboard refresh can allow two JSON files while protecting source code and personal folders."
+        },
+        {
+          "term": "Invariant",
+          "analogy": "A bridge weight limit that must remain true",
+          "definition": "A condition that must still hold after the work is complete.",
+          "example": "Published lesson offsets remain sequential even when new lessons are appended."
+        },
+        {
+          "term": "Evidence",
+          "analogy": "A receipt attached to an expense claim",
+          "definition": "A small, relevant proof that the intended result and its constraints were checked.",
+          "example": "A passing validator and a storage comparison support a routine update without exposing task contents."
+        }
+      ],
+      "misconception": "More context always improves an agent's result. Unrelated context can expand the change surface, blur the acceptance check, and make a safe boundary harder to preserve.",
+      "takeaway": "Set the allowed surface, name the invariant, and collect one proof point that directly supports the requested result."
+    },
+    {
+      "id": "memory-needs-a-foreground-budget-daily",
+      "dayOffset": 79,
+      "title": "Memory pressure needs a foreground budget",
+      "deck": "Protect the work that must stay ready, then reduce competing demand deliberately.",
+      "readMinutes": 4,
+      "summary": "When the Mac feels crowded, start with the task you are trying to keep responsive. Give that foreground work a simple memory budget, identify the largest competing workload, and make one reversible change. This makes the result easier to judge than closing many small apps at random.",
+      "concepts": [
+        {
+          "term": "Memory budget",
+          "analogy": "A fixed number of seats reserved for the main guest",
+          "definition": "A practical limit on how much memory the foreground task should need to remain comfortable.",
+          "example": "An editor may need room for the current project and preview, so background exports should not consume the remaining headroom."
+        },
+        {
+          "term": "Resident set",
+          "analogy": "The tools currently on the workbench",
+          "definition": "The portion of a program's data and code currently held in physical memory.",
+          "example": "A large project may have a bigger resident set while its editor keeps many assets ready for quick switching."
+        },
+        {
+          "term": "Pressure trend",
+          "analogy": "A thermometer watched over the whole afternoon",
+          "definition": "The direction and persistence of memory pressure across a comparable period of work.",
+          "example": "Pressure that stays high during the same export is a stronger clue than one brief spike during app launch."
+        }
+      ],
+      "misconception": "One brief memory-pressure spike means the Mac is failing. A short burst can be normal; sustained pressure during the same workload is more useful for deciding what to investigate.",
+      "takeaway": "Protect the foreground task, identify the largest competing demand, change one thing, and compare the same workload again."
+    },
+    {
+      "id": "storage-needs-a-retention-reason-daily",
+      "dayOffset": 80,
+      "title": "Storage needs a retention reason",
+      "deck": "Keep a file because it has a job, not because it happens to be there.",
+      "readMinutes": 4,
+      "summary": "Storage becomes easier to manage when each large folder has a clear reason to remain. Source material, backups, generated output, and temporary downloads do not all need the same lifetime. Naming the job and review date helps separate useful history from leftovers without turning a storage scan into a guess about what is safe to delete.",
+      "concepts": [
+        {
+          "term": "Retention reason",
+          "analogy": "A label explaining why a box stays on the shelf",
+          "definition": "The purpose that justifies keeping a file or folder for a stated period.",
+          "example": "A release archive may stay for support while a temporary export can be reviewed after the handoff."
+        },
+        {
+          "term": "Review date",
+          "analogy": "A reminder to check a stored suitcase",
+          "definition": "A planned time to reconsider whether retained data still serves its purpose.",
+          "example": "A project can mark a generated preview for review after the client has approved the source work."
+        },
+        {
+          "term": "Source of truth",
+          "analogy": "The master recipe behind several prepared dishes",
+          "definition": "The preserved material treated as authoritative when other copies or outputs are recreated.",
+          "example": "Versioned source and its rebuild instructions can remain authoritative while local build output is replaceable."
+        }
+      ],
+      "misconception": "Old or large files are automatically safe to remove. Age and size are clues for review, not proof that the data is disposable or rebuildable.",
+      "takeaway": "Give important data a retention reason, mark a review point, and identify the source of truth before considering removal."
+    },
+    {
+      "id": "performance-needs-a-smallest-bottleneck-daily",
+      "dayOffset": 81,
+      "title": "Performance starts with the smallest bottleneck",
+      "deck": "Find the narrowest slow point before changing the whole workflow.",
+      "readMinutes": 4,
+      "summary": "A slow result can come from waiting on storage, computation, memory, or another dependency. Start by finding the part that limits progress in the workload you actually care about, then make one focused change and repeat the same check. This keeps a broad performance complaint from turning into a collection of unrelated tweaks.",
+      "concepts": [
+        {
+          "term": "Bottleneck",
+          "analogy": "The narrow neck that limits a bottle's flow",
+          "definition": "The part of a process that currently limits how quickly the whole process can advance.",
+          "example": "If a build spends most of its time waiting for one slow step, improving unrelated steps may not change the total time."
+        },
+        {
+          "term": "Workload",
+          "analogy": "The route a delivery actually travels",
+          "definition": "The real task, input, and conditions used to judge a system's performance.",
+          "example": "The project and build mode used every day are a more useful workload than an unrelated toy example."
+        },
+        {
+          "term": "Focused change",
+          "analogy": "Turning one faucet at a time",
+          "definition": "A deliberate adjustment that targets one suspected cause while leaving other important conditions stable.",
+          "example": "Changing one cache setting before rerunning the same build makes its effect easier to interpret."
+        }
+      ],
+      "misconception": "Improving any fast-looking step will make the whole workflow faster. The total result usually changes most when the current limiting step changes.",
+      "takeaway": "Use the real workload, locate its current bottleneck, change one relevant condition, and compare the same task again."
+    }
+  ]
+}

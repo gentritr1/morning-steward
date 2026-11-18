@@ -1,0 +1,6907 @@
+/* ============================================================
+   STEWARD // GROUND CONTROL
+   Instrument-dark flight deck. Segmented LED bars everywhere.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  /* canvas */
+  --void: oklch(0.17 0.028 264);
+  --deck: oklch(0.225 0.032 264);
+  --deck-raised: oklch(0.27 0.034 264);
+  --well: oklch(0.145 0.025 264);
+  --rule: oklch(0.34 0.03 264);
+  --rule-bright: oklch(0.56 0.035 264);
+
+  /* text */
+  --text: oklch(0.97 0.008 264);
+  --text-2: oklch(0.8 0.02 264);
+  --text-3: oklch(0.66 0.022 264);
+
+  /* the instrument slate · markers, receipts and every 10–12px annotation in
+     the shell. One token; the lighter and darker slates the kit asks for are
+     mixed from it at the point of use rather than becoming three tokens.
+     L is 0.62 rather than the 0.60 the kit implies: at 0.60 it renders #718295
+     and lands at 4.35:1 on --deck, under the 4.5 a 10px receipt needs. 0.62 is
+     #77889b — still the #7387a3/#5c7594 family — at 4.72 on --deck, 5.46 on
+     --well, 5.27 on --void. */
+  --slate: oklch(0.62 0.035 250);
+
+  /* signals */
+  --signal: oklch(0.86 0.2 130);
+  --plasma: oklch(0.8 0.14 205);
+  --amber: oklch(0.82 0.15 78);
+  --coral: oklch(0.72 0.17 25);
+  --violet: oklch(0.72 0.15 300);
+  --signal-dim: color-mix(in oklch, var(--signal) 16%, transparent);
+  --plasma-dim: color-mix(in oklch, var(--plasma) 16%, transparent);
+  --amber-dim: color-mix(in oklch, var(--amber) 16%, transparent);
+  --coral-dim: color-mix(in oklch, var(--coral) 16%, transparent);
+  --violet-dim: color-mix(in oklch, var(--violet) 18%, transparent);
+
+  /* the phosphor ramp — one place for every lit cell on the deck */
+  --lit-dim: 0.1;
+  --lit-mid: 0.3;
+  --lit: 0.62;
+  --lit-hi: 0.85;
+
+  /* surface texture, tokenised so the day shift can invert it instead of
+     painting a white sheen onto a white panel */
+  --sheen: oklch(1 0 0 / 0.018);
+  --panel-sheen: oklch(1 0 0 / 0.05);
+  --grid-line: color-mix(in oklch, var(--rule-bright) 7%, transparent);
+  --vignette: oklch(0.1 0.02 264 / 0.75);
+  /* how much of a signal colour survives into its glow */
+  --glow-mix: 60%;
+
+  /* type */
+  --font-display: "Space Grotesk", Inter, ui-sans-serif, sans-serif;
+  --font-body: Inter, ui-sans-serif, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace;
+
+  --t-hero: clamp(2rem, 3.4vw, 2.9rem);
+  --t-h2: clamp(1.4rem, 2.2vw, 1.9rem);
+  --t-h3: 1.05rem;
+  --t-body: 0.95rem;
+  --t-small: 0.84rem;
+  --t-label: 0.68rem;
+  --t-readout: clamp(2.2rem, 4.6vw, 3.4rem);
+
+  /* shape */
+  --r-xs: 3px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-pill: 999px;
+  --notch: 14px;
+
+  /* motion */
+  --ease-entrance: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-move: cubic-bezier(0.77, 0, 0.175, 1);
+  --d-fast: 120ms;
+  --d-ui: 180ms;
+  --d-enter: 260ms;
+  --d-draw: 640ms;
+
+  --content: min(1220px, calc(100vw - 48px));
+
+  /* text painted ON a signal fill — the fill is light in day, so the legible
+     ink flips with the theme rather than staying pinned to --void */
+  --on-signal: var(--void);
+}
+
+/* ---------- day shift ----------
+   Same deck, lit from outside. Every value below is verified with a computed
+   WCAG table (scratchpad/day_contrast.py), not with the kit's estimates: the
+   ten required pairs all clear 3:1 and the prose pairs clear 4.5:1.
+   The glow, sheen and vignette are tokens precisely so this block can dial the
+   instrument-dark texture down instead of leaving white-on-white artefacts. */
+:root[data-theme="day"] {
+  color-scheme: light;
+
+  --void: #f4f4ef;
+  --deck: #ffffff;
+  --deck-raised: #f5f5f0;
+  --well: #ecece4;
+  --rule: #d9d9d1;
+  --rule-bright: #767c88;
+
+  --text: #131720;
+  --text-2: #3a4150;
+  --text-3: #5c6472;
+
+  /* the same slate, lit from outside: 4.59:1 on --well, 5.45:1 on --deck */
+  --slate: #556b8a;
+
+  --signal: #6f8f14;
+  --plasma: #5b3fd6;
+  --amber: #9a6a08;
+  --coral: #c0392b;
+  --violet: #5b3fd6;
+
+  --on-signal: #131720;
+
+  /* a lit cell has to fight a white ground, so the ramp climbs in day */
+  --lit-dim: 0.18;
+  --lit-mid: 0.45;
+  --lit: 0.92;
+  --lit-hi: 1;
+
+  --sheen: oklch(0 0 0 / 0.03);
+  --panel-sheen: oklch(0 0 0 / 0.04);
+  --grid-line: #e6e6df;
+  --vignette: oklch(0.55 0.02 264 / 0.08);
+  --glow-mix: 14%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+  background: var(--void);
+}
+
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-xs);
+  padding: 2px 6px;
+  color: var(--plasma);
+  word-break: break-word;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--signal) 35%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 60;
+  transform: translateY(-300%);
+  background: var(--signal);
+  color: var(--on-signal);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: var(--t-small);
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  transition: transform var(--d-ui) var(--ease-entrance);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ---------- texture layers ---------- */
+
+.grid-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    radial-gradient(120% 90% at 50% 0%, transparent 55%, var(--vignette) 100%);
+  background-size: 32px 32px, 32px 32px, 100% 100%;
+}
+
+.boot-sweep {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 3px;
+  z-index: 55;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--signal), transparent);
+  box-shadow: 0 0 20px -2px var(--signal);
+}
+
+.boot-sweep.is-running {
+  animation: boot-sweep 620ms var(--ease-entrance) forwards;
+}
+
+@keyframes boot-sweep {
+  0% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(104vh);
+  }
+}
+
+/* ---------- shared primitives ---------- */
+
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.mono-num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.mono-line {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-3);
+  line-height: 1.5;
+}
+
+.panel {
+  background: var(--deck);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  box-shadow: inset 0 1px 0 var(--panel-sheen);
+  padding: 22px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .panel {
+    transition: transform var(--d-fast) var(--ease-move), border-color var(--d-fast) var(--ease-move);
+  }
+
+  .panel:hover {
+    transform: translateY(-2px);
+    border-color: var(--rule-bright);
+  }
+}
+
+.panel-notch {
+  position: relative;
+  background: var(--rule);
+  border-radius: var(--r-md);
+  padding: 22px;
+  clip-path: polygon(0 0, calc(100% - var(--notch)) 0, 100% var(--notch), 100% 100%, 0 100%);
+}
+
+.panel-notch::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  background:
+    radial-gradient(circle 3px at 10px calc(100% - 10px), var(--rule-bright) 0 3px, transparent 3px),
+    radial-gradient(circle 3px at calc(100% - 10px) calc(100% - 10px), var(--rule-bright) 0 3px, transparent 3px),
+    var(--deck);
+  border-radius: calc(var(--r-md) - 1px);
+  clip-path: polygon(0 0, calc(100% - var(--notch)) 0, 100% var(--notch), 100% 100%, 0 100%);
+}
+
+.panel-notch > * {
+  position: relative;
+  z-index: 1;
+}
+
+.well {
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  background: var(--deck-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-pill);
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.chip-signal {
+  color: var(--signal);
+  border-color: color-mix(in oklch, var(--signal) 45%, var(--rule));
+  background: var(--signal-dim);
+}
+
+.chip-amber {
+  color: var(--amber);
+  border-color: color-mix(in oklch, var(--amber) 45%, var(--rule));
+  background: var(--amber-dim);
+}
+
+.chip-coral {
+  color: var(--coral);
+  border-color: color-mix(in oklch, var(--coral) 45%, var(--rule));
+  background: var(--coral-dim);
+}
+
+.chip-plasma {
+  color: var(--plasma);
+  border-color: color-mix(in oklch, var(--plasma) 45%, var(--rule));
+  background: var(--plasma-dim);
+}
+
+/* segmented LED bar — the core idiom.
+   One hue per bar, and the reading is carried by the phosphor ramp alone:
+   dim 0.10 · lit 0.62 · last lit 0.85. A tone class only swaps the hue, never
+   the ramp, so a bar cannot change meaning by changing colour. */
+.seg {
+  --seg-hue: var(--signal);
+  display: flex;
+  gap: 2px;
+  height: 10px;
+}
+
+.seg span {
+  position: relative;
+  flex: 1;
+  border-radius: 1px;
+  background: var(--seg-hue);
+  opacity: var(--lit-dim);
+}
+
+.seg span.on {
+  opacity: var(--lit);
+}
+
+/* two tones maximum: the second run sits inside the lit run at the mid level */
+.seg span.is-second {
+  background: var(--violet);
+  opacity: var(--lit-mid);
+}
+
+.seg span.is-last {
+  opacity: var(--lit-hi);
+}
+
+.seg-plasma {
+  --seg-hue: var(--plasma);
+}
+
+.seg-amber {
+  --seg-hue: var(--amber);
+}
+
+.seg-coral {
+  --seg-hue: var(--coral);
+}
+
+.seg-dim {
+  --seg-hue: var(--rule-bright);
+}
+
+.seg-custom {
+  --seg-hue: var(--seg-color, var(--signal));
+}
+
+/* band markers — the only place amber and coral appear on a bar */
+.seg-band {
+  position: relative;
+  display: grid;
+  gap: 0;
+  padding-bottom: 13px;
+}
+
+.seg-marks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.seg-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--at) * 1%);
+}
+
+.seg-mark i {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 1px;
+  height: 14px;
+  background: var(--rule-bright);
+}
+
+.seg-mark b {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--rule-bright);
+}
+
+.seg-mark-amber i,
+.seg-mark-amber b {
+  background: none;
+  color: var(--amber);
+}
+
+.seg-mark-amber i {
+  background: var(--amber);
+}
+
+.seg-mark-coral i {
+  background: var(--coral);
+}
+
+.seg-mark-coral b {
+  color: var(--coral);
+}
+
+/* band-crossing alert: one amber flush across the cells, then nothing.
+   Only opacity moves — the overlay respects the cell's own ramp level. */
+.seg.is-band-alert span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1px;
+  background: var(--amber);
+  opacity: 0;
+  animation: seg-band-dim 1.2s var(--ease-move) both;
+}
+
+.seg.is-band-alert span.on::after {
+  animation-name: seg-band-lit;
+}
+
+.seg.is-band-alert span.is-last::after {
+  animation-name: seg-band-hi;
+}
+
+@keyframes seg-band-dim {
+  0%, 100% { opacity: 0; }
+  40% { opacity: var(--lit-dim); }
+}
+
+@keyframes seg-band-lit {
+  0%, 100% { opacity: 0; }
+  40% { opacity: var(--lit); }
+}
+
+@keyframes seg-band-hi {
+  0%, 100% { opacity: 0; }
+  40% { opacity: var(--lit-hi); }
+}
+
+.keycap {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+  background: var(--deck-raised);
+  border: 2px solid var(--rule-bright);
+  border-radius: var(--r-sm);
+  padding: 8px 14px;
+  box-shadow: 0 2px 0 var(--well);
+  transition: transform 90ms var(--ease-move), box-shadow 90ms var(--ease-move), border-color var(--d-fast) var(--ease-move), color var(--d-fast) var(--ease-move);
+}
+
+.keycap:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--well);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .keycap:hover {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+}
+
+.keycap[aria-pressed="true"] {
+  border-color: var(--signal);
+  color: var(--signal);
+  background: var(--signal-dim);
+}
+
+.text-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  color: var(--plasma);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: color var(--d-fast) var(--ease-move);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .text-action:hover {
+    color: var(--signal);
+  }
+}
+
+.text-action[aria-pressed="true"] {
+  color: var(--signal);
+}
+
+.led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal-dim);
+  border: 1px solid var(--rule-bright);
+}
+
+.empty-state {
+  border: 1px dashed var(--rule-bright);
+  border-radius: var(--r-sm);
+  padding: 20px;
+  color: var(--text-2);
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.empty-state.compact {
+  padding: 28px 20px;
+}
+
+/* ---------- header ---------- */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in oklch, var(--void) 86%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.masthead {
+  width: var(--content);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--signal);
+  color: var(--on-signal);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  border-radius: var(--r-sm);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.brand-edition {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.brand-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 8px var(--signal);
+  animation: led-breathe 3s ease-in-out infinite alternate;
+}
+
+.primary-nav {
+  display: flex;
+  gap: 4px;
+  margin-inline: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.primary-nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  color: var(--text-2);
+  font-size: var(--t-small);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  transition: color var(--d-fast) var(--ease-move);
+}
+
+.primary-nav a .ch {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-3);
+  transition: color var(--d-fast) var(--ease-move);
+}
+
+.primary-nav a::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 2px;
+  height: 2px;
+  background: var(--signal);
+  border-radius: 1px;
+  transform: scaleX(0);
+  transition: transform var(--d-ui) var(--ease-move);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .primary-nav a:hover {
+    color: var(--text);
+  }
+
+  .primary-nav a:hover::after {
+    transform: scaleX(0.6);
+  }
+}
+
+.primary-nav a[aria-current="page"] {
+  color: var(--text);
+}
+
+.primary-nav a[aria-current="page"] .ch {
+  color: var(--signal);
+}
+
+.primary-nav a[aria-current="page"]::after {
+  transform: scaleX(1);
+  box-shadow: 0 0 12px -2px var(--signal);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.scan-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 8px var(--signal);
+  transition: background var(--d-ui) var(--ease-move), box-shadow var(--d-ui) var(--ease-move);
+}
+
+.scan-state.has-fallback .status-dot {
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+}
+
+.scan-state.is-reading .status-dot {
+  background: var(--plasma);
+  box-shadow: 0 0 8px var(--plasma);
+  animation: led-breathe 0.9s ease-in-out infinite alternate;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid var(--rule-bright);
+  border-radius: var(--r-sm);
+  background: var(--deck-raised);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 7px 12px;
+  transition: border-color var(--d-fast) var(--ease-move), color var(--d-fast) var(--ease-move), transform 90ms var(--ease-move);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:hover {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.refresh-button svg {
+  transition: transform var(--d-ui) var(--ease-move);
+}
+
+.refresh-button.is-loading svg {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- shell ---------- */
+
+main {
+  display: block;
+}
+
+.brief-shell {
+  width: var(--content);
+  margin: 0 auto;
+  padding: 34px 0 80px;
+  display: grid;
+  gap: 56px;
+}
+
+.brief-dateline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 12px;
+  margin-bottom: -22px;
+}
+
+.brief-dateline p {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.data-notice {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid color-mix(in oklch, var(--amber) 45%, var(--rule));
+  background: var(--amber-dim);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+  color: var(--text-2);
+  font-size: var(--t-small);
+}
+
+.data-notice svg {
+  color: var(--amber);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.data-notice strong {
+  color: var(--amber);
+}
+
+/* ---------- channels ---------- */
+
+.page-section {
+  scroll-margin-top: 96px;
+}
+
+.channel-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  margin-bottom: 18px;
+}
+
+.ch-badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--signal);
+  background: var(--signal-dim);
+  border: 1px solid color-mix(in oklch, var(--signal) 40%, var(--rule));
+  border-radius: var(--r-xs);
+  padding: 3px 7px;
+}
+
+.channel-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.channel-id {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.channel-id .section-name {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+
+.channel-id h2 {
+  font-size: var(--t-h2);
+}
+
+.channel-sub {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.subsection-heading {
+  margin-bottom: 16px;
+  display: grid;
+  gap: 4px;
+}
+
+.subsection-heading h2,
+.subsection-heading h3 {
+  font-size: var(--t-h3);
+}
+
+.subsection-heading p {
+  color: var(--text-3);
+  font-size: var(--t-small);
+}
+
+.subsection-heading-split {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* ---------- reveal choreography ---------- */
+
+html.has-js [data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+html.has-js [data-reveal].is-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--d-enter) var(--ease-entrance),
+    transform var(--d-enter) var(--ease-entrance);
+  transition-delay: calc(var(--i, 0) * 50ms);
+}
+
+/* draw-ins gated on reveal.
+   The bar fills cell by cell, left to right: 18ms apart, and the whole bar
+   lands inside 400ms however many cells it has (--sd is computed per bar, --k
+   is the cell's index). Only opacity and scaleY move. */
+html.has-js [data-reveal] .seg span {
+  opacity: 0;
+  transform: scaleY(0.3);
+}
+
+html.has-js [data-reveal].is-in .seg span {
+  opacity: var(--lit-dim);
+  transform: scaleY(1);
+  transition:
+    opacity 220ms cubic-bezier(0.2, 0.9, 0.2, 1) calc(var(--i, 0) * 40ms + 180ms + var(--k, 0) * var(--sd, 17ms)),
+    transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1) calc(var(--i, 0) * 40ms + 180ms + var(--k, 0) * var(--sd, 17ms));
+}
+
+html.has-js [data-reveal].is-in .seg span.on {
+  opacity: var(--lit);
+}
+
+html.has-js [data-reveal].is-in .seg span.is-second {
+  opacity: var(--lit-mid);
+}
+
+html.has-js [data-reveal].is-in .seg span.is-last {
+  opacity: var(--lit-hi);
+}
+
+/* ---------- the briefing sequence ----------
+   Once a day, CH01 reports in a fixed order rather than in panel order:
+   the dial first, then the tiles, then what moved, then the console. Steward's
+   own word lands at 360ms, timed in stewardReport. */
+#today[data-briefing] .gauge-panel,
+#today[data-briefing] .headline-panel {
+  --bd: 0ms;
+}
+
+#today[data-briefing] .stat-tile {
+  --bd: 90ms;
+}
+
+#today[data-briefing] .movement-panel {
+  --bd: 180ms;
+}
+
+#today[data-briefing] .console-panel {
+  --bd: 270ms;
+}
+
+#today[data-briefing] [data-reveal].is-in {
+  transition-delay: var(--bd, 0ms);
+}
+
+/* the markers are a scale, not a reading — they arrive with the panel */
+html.has-js [data-reveal] .seg-marks {
+  opacity: 0;
+}
+
+html.has-js [data-reveal].is-in .seg-marks {
+  opacity: 1;
+  transition: opacity 260ms var(--ease-entrance) calc(var(--i, 0) * 40ms + 420ms);
+}
+
+/* ---------- CH 01 · status board ---------- */
+
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.today-bento .gauge-panel {
+  grid-column: span 5;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+  align-content: start;
+  /* the cluster is label → dial → seg → chip and nothing else; don't stretch the
+     panel to the taller neighbour's height and leave a dead band under the chip. */
+  align-self: start;
+}
+
+.gauge-panel .mono-label {
+  justify-self: start;
+}
+
+/* ---------- the dial · one anatomy, three instruments ----------
+   Ticks, track, arc, reticle, readout. The hue belongs to the instrument and
+   never moves with the reading — a dial that changed colour would be saying
+   something the chip beside it is already saying. */
+.dial {
+  position: relative;
+  /* the readout is sized in cqw against this box, so the "text never touches the
+     stroke" clearance is a fixed proportion of the dial at every viewport, and
+     the unit line can drop itself once the dial is too small to carry it. */
+  container-type: inline-size;
+}
+
+.dial-svg {
+  display: block;
+  width: 100%;
+  /* viewBox 0 8 200 144 trims the dead band above/below the 240° arc
+     symmetrically (arc + 4.5 half-stroke spans y 15.5→144.5, box centre stays
+     y 80); visible overflow keeps the value stroke's glow from clipping. */
+  overflow: visible;
+}
+
+/* An instrument cluster, not a progress bar: the block is capped so the readout
+   is always small relative to the dial, and the dial is always read at one size. */
+.gauge {
+  width: min(240px, 100%);
+}
+
+/* fine calibration marks under the track: 25 ticks across the sweep, so the
+   unlit part of the dial still reads as a scale rather than an empty gutter. */
+.dial-ticks {
+  fill: none;
+  stroke: var(--rule-bright);
+  stroke-width: 16;
+  stroke-linecap: butt;
+  stroke-dasharray: 0.35 3.65;
+  opacity: 0.22;
+}
+
+.dial-track {
+  fill: none;
+  stroke: var(--well);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+
+.dial-value {
+  fill: none;
+  stroke: var(--dial-hue, var(--signal));
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dasharray: var(--dial-pct) 100;
+  stroke-dashoffset: var(--dial-pct);
+  filter: drop-shadow(0 0 8px color-mix(in oklch, var(--dial-hue, var(--signal)) var(--glow-mix), transparent));
+}
+
+/* the needle tip: sits exactly on the end of the lit arc (centre computed in
+   dial() from the same geometry the path is drawn from). */
+.dial-reticle {
+  fill: var(--dial-hue, var(--signal));
+  stroke: none;
+  filter: drop-shadow(0 0 8px color-mix(in oklch, var(--dial-hue, var(--signal)) var(--glow-mix), transparent));
+}
+
+.dial[data-hue="plasma"] {
+  --dial-hue: var(--plasma);
+}
+
+.dial[data-hue="violet"] {
+  --dial-hue: var(--violet);
+}
+
+/* no reading at all: the scale stays, the arc does not appear, and the ticks
+   drop back so the instrument reads as unpowered rather than as zero */
+.dial[data-empty="true"] .dial-ticks {
+  opacity: 0.12;
+}
+
+.dial[data-empty="true"] .dial-track {
+  opacity: 0.6;
+}
+
+html.has-js [data-reveal] .dial-reticle {
+  opacity: 0;
+}
+
+html.has-js [data-reveal].is-in .dial-value {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 700ms var(--ease-entrance) 200ms;
+}
+
+/* lands after the 200ms + 700ms draw-in has reached the tip */
+html.has-js [data-reveal].is-in .dial-reticle {
+  opacity: 1;
+  transition: opacity 320ms var(--ease-entrance) 900ms;
+}
+
+.dial-readout {
+  position: absolute;
+  /* the 240° arc spans y 20→140 and the viewBox is trimmed symmetrically about
+     y 80, so inset:0 + centred content puts the readout on the arc's own bbox
+     midpoint. Centring the block instead of pinning its top keeps the readout
+     stable as the font clamps down at narrow widths. */
+  inset: 0;
+  display: grid;
+  gap: 2px;
+  align-content: center;
+  justify-items: center;
+}
+
+.gauge .dial-readout .readout {
+  /* worst case "888.8 GB" is 8 mono cells ≈ 4.64em; at 12.4cqw that is ~58% of
+     the dial's width, comfortably inside the 64% budget and clear of the stroke.
+     The first declaration is the fallback where cqw is unsupported. */
+  font-size: 1.85rem;
+  font-size: clamp(1.4rem, 12.4cqw, 2rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.dial-unit {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-3);
+}
+
+/* below 100px there is no room for a second line inside the arc — the unit
+   drops and the readout keeps the dial */
+@container (max-width: 100px) {
+  .dial-unit {
+    display: none;
+  }
+}
+
+/* the seg and the chip are part of the cluster: same width as the dial, stacked
+   straight under it, so the panel's height is the sum of its parts. */
+.gauge-panel .seg {
+  width: min(240px, 100%);
+}
+
+.status-chip {
+  justify-self: center;
+}
+
+.today-bento .headline-panel {
+  grid-column: span 7;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.headline-panel h1 {
+  font-size: var(--t-hero);
+  letter-spacing: -0.025em;
+}
+
+.transcript {
+  position: relative;
+  padding: 14px 16px;
+  background-image: repeating-linear-gradient(0deg, transparent 0 2px, var(--sheen) 2px 3px);
+}
+
+.transcript p {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+.transcript.is-clamped p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.transcript .caret {
+  color: var(--signal);
+  margin-right: 4px;
+}
+
+.note-expand {
+  justify-self: start;
+}
+
+.stat-tiles {
+  grid-column: span 12;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.stat-tile {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 18px;
+}
+
+.tile-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.tile-value.growth,
+.change-value.growth,
+.category-delta.growth {
+  color: var(--coral);
+}
+
+.tile-value.reduction,
+.change-value.reduction,
+.category-delta.reduction {
+  color: var(--signal);
+}
+
+.tile-value.steady {
+  color: var(--text-2);
+}
+
+.today-bento .movement-panel {
+  grid-column: span 7;
+}
+
+.change-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.change-list li {
+  display: grid;
+  grid-template-columns: auto 1fr minmax(120px, 1.1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.change-rank {
+  font-size: 0.72rem;
+  color: var(--text-3);
+}
+
+.change-name {
+  display: grid;
+  line-height: 1.3;
+}
+
+.change-name strong {
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.change-name span {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.rack-track {
+  position: relative;
+  height: 12px;
+  background: var(--well);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.rack-track::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--rule-bright);
+}
+
+.rack-bar {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: calc(var(--w, 0) * 0.48%);
+  border-radius: 1px;
+}
+
+.rack-bar.growth {
+  left: 50%;
+  background: var(--coral);
+  transform-origin: left;
+}
+
+.rack-bar.reduction {
+  right: 50%;
+  background: var(--signal);
+  transform-origin: right;
+}
+
+html.has-js [data-reveal] .rack-bar {
+  transform: scaleX(0);
+}
+
+html.has-js [data-reveal].is-in .rack-bar {
+  transform: scaleX(1);
+  transition: transform 420ms var(--ease-entrance) calc(var(--i, 0) * 40ms + 200ms);
+}
+
+.change-value {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* instrumented empty state */
+.scanner-state {
+  justify-items: stretch;
+}
+
+.scan-baseline {
+  position: relative;
+  height: 2px;
+  background: var(--rule);
+  border-radius: 1px;
+  overflow: visible;
+  /* the dot travels 100cqw, so this element must be the query container */
+  container-type: inline-size;
+}
+
+.scan-dot {
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 10px var(--signal);
+  animation: scan-traverse 8s linear infinite alternate;
+}
+
+@keyframes scan-traverse {
+  to {
+    transform: translateX(calc(100cqw - 8px));
+  }
+}
+
+.reading-count {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reading-count .seg {
+  width: 56px;
+}
+
+.console-panel {
+  grid-column: span 5;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.console-lines {
+  padding: 14px 16px;
+  display: grid;
+  gap: 8px;
+  background-image: repeating-linear-gradient(0deg, transparent 0 2px, var(--sheen) 2px 3px);
+}
+
+.console-lines p {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--text-2);
+}
+
+.cursor {
+  display: inline-block;
+  width: 7px;
+  height: 13px;
+  margin-left: 6px;
+  vertical-align: -2px;
+  background: var(--signal);
+  animation: cursor-blink 1.1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.console-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- CH 02 · deck plan ---------- */
+
+.storage-layout {
+  margin-bottom: 20px;
+}
+
+.composition-figure {
+  grid-column: span 7;
+  margin: 0;
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.composition-figure figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.composition-figure figcaption strong {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.composition-track {
+  display: flex;
+  gap: 1px;
+  height: 28px;
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  background: var(--void);
+}
+
+.comp-seg {
+  flex: 0 0 var(--segment-width);
+  background-color: var(--segment-color);
+  background-image: repeating-linear-gradient(90deg, transparent 0 4px, oklch(0.17 0.028 264 / 0.28) 4px 6px);
+  transform-origin: left;
+  transition: opacity var(--d-fast) var(--ease-move);
+}
+
+html.has-js [data-reveal] .comp-seg {
+  transform: scaleX(0);
+}
+
+html.has-js [data-reveal].is-in .comp-seg {
+  transform: scaleX(1);
+  transition: transform 420ms var(--ease-entrance) calc(var(--i, 0) * 40ms + 160ms), opacity var(--d-fast) var(--ease-move);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .composition-track:hover .comp-seg {
+    opacity: 0.35;
+  }
+
+  .composition-track:hover .comp-seg:hover {
+    opacity: 1;
+  }
+}
+
+.category-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 18px;
+}
+
+.category-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "swatch main"
+    "swatch size"
+    "swatch meter";
+  column-gap: 10px;
+  row-gap: 4px;
+  align-items: start;
+  padding: 10px 12px;
+  background: var(--deck-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+}
+
+.category-swatch {
+  grid-area: swatch;
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--swatch-color);
+}
+
+.category-main {
+  grid-area: main;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.category-main strong {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.kind-pill {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--rule-bright);
+  color: var(--text-3);
+}
+
+.kind-pill.kind-generated {
+  color: var(--signal);
+  border-color: color-mix(in oklch, var(--signal) 45%, var(--rule));
+}
+
+.kind-pill.kind-personal {
+  color: var(--violet);
+  border-color: color-mix(in oklch, var(--violet) 45%, var(--rule));
+}
+
+.kind-pill.kind-system,
+.kind-pill.kind-app {
+  color: var(--plasma);
+  border-color: color-mix(in oklch, var(--plasma) 45%, var(--rule));
+}
+
+.category-size {
+  grid-area: size;
+  font-size: 0.72rem;
+  color: var(--text-2);
+}
+
+.category-meter {
+  grid-area: meter;
+}
+
+.category-meter .seg {
+  height: 6px;
+  max-width: 140px;
+}
+
+.category-delta {
+  grid-column: 2;
+  font-size: 0.7rem;
+}
+
+.trend-panel {
+  grid-column: span 5;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.trend-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trend-heading h3 {
+  font-size: var(--t-h3);
+  margin-top: 4px;
+}
+
+/* ---------- the scope · free-space trace ----------
+   One column per reading on a 44px-pitch hairline grid, with a slow ambient
+   sweep and a "now" reticle pinned to the latest value. Columns are divs, so
+   the scrub can move a crosshair and a chip with transforms alone. */
+.trace {
+  display: grid;
+  gap: 10px;
+}
+
+.scope {
+  --scope-h: 182px;
+  position: relative;
+  height: var(--scope-h);
+  overflow: hidden;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    repeating-linear-gradient(0deg, transparent 0 2px, var(--sheen) 2px 3px);
+  background-size: 44px 44px, 44px 44px, auto;
+}
+
+.scope-cols {
+  position: absolute;
+  inset: 12px 14px;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--gap, 2px);
+}
+
+.scope-col {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 1px;
+  height: calc(var(--h) * 1%);
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--signal) 34%, transparent),
+    color-mix(in oklch, var(--signal) 5%, transparent)
+  );
+}
+
+.scope-cap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--signal);
+  opacity: var(--lit);
+}
+
+.scope-col.is-now .scope-cap {
+  opacity: var(--lit-hi);
+}
+
+/* ambient: one pass top to bottom, every 3.4s, and nothing else moves */
+.scope-sweep {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+  animation: scope-sweep 3.4s linear infinite;
+}
+
+.scope-sweep::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--signal);
+  opacity: 0.5;
+}
+
+@keyframes scope-sweep {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* the now ring — 11px, pinned to the latest column's value on the right */
+.scope-now {
+  position: absolute;
+  right: 0;
+  bottom: calc(var(--h) * 1%);
+  width: 11px;
+  height: 11px;
+  margin-bottom: -5.5px;
+  border: 1px solid var(--signal);
+  border-radius: 50%;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* ---- scrub · pointer only ---- */
+
+.scope-cross,
+.scope-chip {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.scope-cross {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: var(--rule-bright);
+  transform: translateX(var(--cx, 0));
+  transition: opacity var(--d-fast) var(--ease-move), transform 90ms linear;
+}
+
+.scope-chip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: 6px;
+  padding: 3px 6px;
+  background: var(--deck-raised);
+  border: 1px solid var(--rule-bright);
+  border-radius: var(--r-xs);
+  font-size: 0.62rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--text);
+  transform: translateX(var(--chip-x, 0));
+  transition: opacity var(--d-fast) var(--ease-move), transform 90ms linear;
+}
+
+.scope-chip i {
+  font-style: normal;
+  color: var(--text-3);
+}
+
+.scope-chip[data-dir="up"] i {
+  color: var(--signal);
+}
+
+.scope-chip[data-dir="down"] i {
+  color: var(--amber);
+}
+
+.scope[data-scrub="on"] .scope-cross,
+.scope[data-scrub="on"] .scope-chip {
+  opacity: 1;
+}
+
+.scope[data-scrub="on"] .scope-col {
+  opacity: 0.45;
+  transition: opacity var(--d-fast) var(--ease-move);
+}
+
+.scope[data-scrub="on"] .scope-col.is-hot {
+  opacity: 1;
+}
+
+.scope[data-scrub="on"] .scope-col.is-hot .scope-cap {
+  opacity: var(--lit-hi);
+}
+
+/* the mobile stand-in for the scope — the same readings, 30 columns, no scrub */
+.trend-strip {
+  display: none;
+  align-items: flex-end;
+  gap: 2px;
+  height: 56px;
+  padding: 8px 10px;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+}
+
+.trend-strip span {
+  flex: 1 1 0;
+  height: calc(var(--h) * 1%);
+  background: var(--signal);
+  opacity: var(--lit);
+  border-radius: 1px;
+}
+
+.trend-strip span:last-child {
+  opacity: var(--lit-hi);
+}
+
+.chart-axis {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.66rem;
+  color: var(--text-3);
+}
+
+.chart-axis strong {
+  color: var(--signal);
+  font-size: 0.74rem;
+}
+
+.radar-state {
+  justify-items: center;
+  padding: 36px 20px;
+}
+
+.radar-ping {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+}
+
+.radar-ping::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--signal);
+  box-shadow: 0 0 10px var(--signal);
+}
+
+.radar-ping span {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--signal);
+  border-radius: 50%;
+  opacity: 0;
+  animation: radar-ping 2.6s ease-out infinite;
+}
+
+.radar-ping span:last-child {
+  animation-delay: 1.3s;
+}
+
+@keyframes radar-ping {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* project rack */
+
+.project-slice {
+  margin-bottom: 20px;
+}
+
+.project-table {
+  display: grid;
+  gap: 2px;
+}
+
+.project-table-head,
+.project-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.2fr) 1.6fr auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px;
+}
+
+.project-table-head {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.project-row {
+  background: var(--deck-raised);
+  border-radius: var(--r-xs);
+  font-size: var(--t-small);
+}
+
+.project-name {
+  font-size: 0.78rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+/* two-tone seg: the lit run is the footprint, the violet cells inside it are the
+   rebuildable slice. 24 cells, so the cell never falls under the density rule. */
+.project-bar-cell {
+  min-width: 120px;
+}
+
+.project-bar-cell .seg {
+  height: 12px;
+}
+
+.git-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.git-cell.is-lit {
+  color: var(--signal);
+}
+
+.git-cell.is-lit .led {
+  background: var(--signal);
+  border-color: var(--signal);
+  box-shadow: 0 0 6px var(--signal);
+}
+
+/* reclaim bay */
+
+.recommendation-list {
+  display: grid;
+  gap: 12px;
+}
+
+.recommendation {
+  padding: 0;
+  overflow: hidden;
+}
+
+.recommendation summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  cursor: pointer;
+}
+
+.recommendation summary::-webkit-details-marker {
+  display: none;
+}
+
+/* the summary fills the padding box, so the default +2px focus ring would be
+   clipped away by .recommendation's overflow: hidden — draw it inside instead */
+.recommendation summary:focus-visible {
+  outline-offset: -3px;
+}
+
+.recommendation summary::before {
+  content: "▸";
+  color: var(--signal);
+  font-family: var(--font-mono);
+  transition: transform var(--d-ui) var(--ease-move);
+}
+
+.recommendation[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.summary-main {
+  display: grid;
+  gap: 2px;
+  margin-right: auto;
+}
+
+.summary-main strong {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.summary-main span {
+  font-size: 0.72rem;
+  color: var(--text-3);
+}
+
+.risk-badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.risk-badge.risk-low,
+.risk-badge.risk-safe,
+.risk-badge.risk-rebuildable {
+  color: var(--signal);
+  border-color: color-mix(in oklch, var(--signal) 45%, var(--rule));
+  background: var(--signal-dim);
+}
+
+.risk-badge.risk-medium,
+.risk-badge.risk-review {
+  color: var(--amber);
+  border-color: color-mix(in oklch, var(--amber) 45%, var(--rule));
+  background: var(--amber-dim);
+}
+
+.risk-badge.risk-high {
+  color: var(--coral);
+  border-color: color-mix(in oklch, var(--coral) 45%, var(--rule));
+  background: var(--coral-dim);
+}
+
+.recommendation-body {
+  padding: 4px 20px 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.recommendation[open] .recommendation-body {
+  animation: bay-open 220ms var(--ease-entrance);
+}
+
+@keyframes bay-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.spec-grid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+}
+
+.spec-grid > div {
+  background: var(--well);
+  padding: 12px 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.spec-grid .spec-wide {
+  grid-column: 1 / -1;
+}
+
+.spec-grid dt {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.spec-grid dd {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.switch-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 500;
+  transition: color var(--d-fast) var(--ease-move);
+}
+
+.switch {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--well);
+  border: 2px solid var(--rule-bright);
+  transition: background var(--d-ui) var(--ease-move), border-color var(--d-ui) var(--ease-move);
+}
+
+.switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-2);
+  transition: transform 160ms var(--ease-move), background 160ms var(--ease-move);
+}
+
+.switch-control[aria-pressed="true"] {
+  color: var(--signal);
+}
+
+.switch-control[aria-pressed="true"] .switch {
+  background: var(--signal-dim);
+  border-color: var(--signal);
+}
+
+.switch-control[aria-pressed="true"] .switch-knob {
+  transform: translateX(16px);
+  background: var(--signal);
+  box-shadow: 0 0 8px var(--signal);
+}
+
+/* ---------- CH 03 · academy ---------- */
+
+.daily-lesson {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 32px;
+  padding: 28px;
+  margin-bottom: 24px;
+}
+
+.lesson-editorial {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.lesson-masthead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* the patch is the same dial at 360°: no ticks, no reticle, a thinner stroke.
+   The ring path starts at 12 o'clock, so it needs no wrapper rotation. */
+.mission-patch {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.mission-patch .dial-track,
+.mission-patch .dial-value {
+  stroke-width: 5;
+}
+
+.mission-patch .dial-value {
+  filter: none;
+}
+
+.mission-patch strong {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--violet);
+}
+
+.lesson-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lesson-deck {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  color: var(--violet);
+}
+
+.daily-lesson h3#lesson-title {
+  font-size: var(--t-h2);
+}
+
+.lesson-summary {
+  color: var(--text-2);
+  max-width: 58ch;
+}
+
+/* flip triptych */
+
+.flip-deck {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.flip-card {
+  perspective: 900px;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  min-height: 190px;
+}
+
+.flip-inner {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 260ms var(--ease-entrance);
+}
+
+.flip-card.is-flipped .flip-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-face {
+  grid-area: 1 / 1;
+  display: grid;
+  gap: 8px;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: 16px 12px;
+  border-radius: var(--r-sm);
+  backface-visibility: hidden;
+  border: 1px solid var(--rule);
+}
+
+.flip-front {
+  background: var(--deck-raised);
+  color: var(--text);
+}
+
+.flip-front .pictogram {
+  width: 44px;
+  height: 44px;
+  color: var(--violet);
+}
+
+.flip-front strong {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.flip-hint {
+  color: var(--text-3);
+  font-size: 0.56rem;
+}
+
+.flip-back {
+  transform: rotateY(180deg);
+  background: var(--well);
+  border-color: color-mix(in oklch, var(--violet) 40%, var(--rule));
+}
+
+.flip-back strong {
+  color: var(--violet);
+  font-size: 0.85rem;
+}
+
+.flip-back span {
+  font-size: 0.72rem;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.flip-back em {
+  font-size: 0.66rem;
+  font-style: normal;
+  color: var(--text-3);
+  line-height: 1.4;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .flip-card:not(.is-flipped):hover .flip-inner {
+    transform: rotateY(12deg);
+  }
+}
+
+/* translation strip */
+
+.translation-strip {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  background: var(--rule);
+}
+
+.translation-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--well);
+  font-size: 0.82rem;
+}
+
+.translation-row .arrow {
+  color: var(--violet);
+  font-family: var(--font-mono);
+}
+
+.translation-row strong {
+  color: var(--violet);
+  text-align: right;
+  font-size: 0.8rem;
+}
+
+.misconception-note {
+  display: grid;
+  gap: 6px;
+  border: 1px solid color-mix(in oklch, var(--amber) 40%, var(--rule));
+  background: var(--amber-dim);
+  border-radius: var(--r-sm);
+  padding: 14px 16px;
+}
+
+.myth-label {
+  color: var(--amber);
+}
+
+.misconception-note p {
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+.lesson-takeaway {
+  display: grid;
+  gap: 10px;
+  --notch: 12px;
+  /* lime bezel: .panel-notch's own background is the 1px rim, ::before is the deck fill */
+  background: color-mix(in oklch, var(--signal) 45%, var(--rule));
+}
+
+.lesson-takeaway::before {
+  background:
+    radial-gradient(circle 3px at 10px calc(100% - 10px), color-mix(in oklch, var(--signal) 60%, var(--rule)) 0 3px, transparent 3px),
+    radial-gradient(circle 3px at calc(100% - 10px) calc(100% - 10px), color-mix(in oklch, var(--signal) 60%, var(--rule)) 0 3px, transparent 3px),
+    var(--deck);
+}
+
+.lesson-takeaway > .mono-label {
+  color: var(--signal);
+}
+
+.lesson-takeaway p {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.log-button {
+  justify-self: start;
+  position: relative;
+}
+
+.burst-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.burst-stage i {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--signal);
+  transform: rotate(var(--a)) translateX(0);
+  animation: burst 520ms var(--ease-entrance) var(--d, 0ms) forwards;
+}
+
+@keyframes burst {
+  to {
+    transform: rotate(var(--a)) translateX(54px);
+    opacity: 0;
+  }
+}
+
+/* memory lab rig */
+
+.memory-lab {
+  margin: 0;
+  display: grid;
+  gap: 16px;
+  transition: filter 200ms var(--ease-move);
+}
+
+.memory-lab::before {
+  transition: box-shadow 200ms var(--ease-move);
+}
+
+.memory-lab[data-pressure="busy"] {
+  background: color-mix(in oklch, var(--amber) 40%, var(--rule));
+}
+
+.memory-lab[data-pressure="crowded"] {
+  background: color-mix(in oklch, var(--coral) 45%, var(--rule));
+}
+
+.memory-lab figcaption {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.memory-lab figcaption h3 {
+  font-size: var(--t-h3);
+  margin-top: 4px;
+}
+
+.lab-prompt {
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+.workload-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.workload-control {
+  display: grid;
+  gap: 8px;
+}
+
+.workload-control > span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: var(--t-small);
+}
+
+.workload-control output {
+  color: var(--signal);
+  font-size: 0.78rem;
+}
+
+.workload-control input[type="range"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--well);
+  outline-offset: 6px;
+  cursor: pointer;
+}
+
+.workload-control input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--signal);
+  border: 4px solid var(--deck);
+  box-shadow: 0 0 0 1px var(--rule-bright);
+  transition: transform var(--d-fast) var(--ease-move);
+}
+
+.workload-control input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.12);
+}
+
+.workload-control input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--signal);
+  border: 3px solid var(--deck);
+  box-shadow: 0 0 0 1px var(--rule-bright);
+}
+
+.memory-model {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.resource-zone {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  padding: 14px;
+}
+
+.resource-zone header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.resource-zone h4 {
+  font-size: 0.95rem;
+  margin-top: 2px;
+}
+
+.resource-zone > p {
+  font-size: 0.68rem;
+  color: var(--text-3);
+  line-height: 1.45;
+}
+
+.resource-zone [data-ram-count],
+.resource-zone [data-swap-count] {
+  font-size: 0.78rem;
+  color: var(--signal);
+}
+
+.storage-zone [data-swap-count] {
+  color: var(--amber);
+}
+
+.resource-slots {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.resource-slots span {
+  height: 20px;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--rule-bright);
+  background: transparent;
+  opacity: 0.6;
+  transition:
+    transform 140ms var(--ease-entrance) calc(var(--n, 0) * 24ms),
+    background 140ms var(--ease-move) calc(var(--n, 0) * 24ms),
+    opacity 140ms var(--ease-move) calc(var(--n, 0) * 24ms);
+  transform: scale(0.9);
+}
+
+.resource-slots span.is-filled {
+  background: var(--signal);
+  border-color: var(--signal);
+  opacity: 1;
+  transform: scale(1);
+  box-shadow: 0 0 8px -2px var(--signal);
+}
+
+.swap-slots span.is-filled {
+  background: var(--amber);
+  border-color: var(--amber);
+  box-shadow: 0 0 8px -2px var(--amber);
+}
+
+.memory-handoff {
+  display: grid;
+  gap: 6px;
+  align-content: center;
+  justify-items: center;
+}
+
+.conduit {
+  position: relative;
+  width: 4px;
+  height: 64px;
+  border-radius: 2px;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.conduit-pulse {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--amber);
+  opacity: 0;
+}
+
+.memory-lab[data-pressure="crowded"] .conduit {
+  border-color: var(--amber);
+}
+
+.memory-lab[data-pressure="crowded"] .conduit-pulse {
+  opacity: 1;
+  animation: conduit-flow 1.4s linear infinite;
+}
+
+@keyframes conduit-flow {
+  from {
+    transform: translateY(-12px);
+  }
+  to {
+    transform: translateY(66px);
+  }
+}
+
+.storage-shelves {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.storage-shelves span {
+  height: 8px;
+  border-radius: 2px;
+  background: var(--plasma-dim);
+}
+
+.swap-tray {
+  display: grid;
+  gap: 8px;
+  border: 1px dashed color-mix(in oklch, var(--amber) 50%, var(--rule));
+  border-radius: var(--r-xs);
+  padding: 10px;
+}
+
+.swap-tray > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.memory-reading {
+  padding: 12px 14px;
+  display: grid;
+  gap: 2px;
+}
+
+.memory-reading strong {
+  font-size: var(--t-small);
+}
+
+.memory-reading span {
+  font-size: 0.74rem;
+  color: var(--text-3);
+}
+
+.memory-lab[data-pressure="busy"] .memory-reading strong {
+  color: var(--amber);
+}
+
+.memory-lab[data-pressure="crowded"] .memory-reading strong {
+  color: var(--coral);
+}
+
+/* concept explorer */
+
+.concept-explorer {
+  margin: 0;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.concept-explorer figcaption h3 {
+  font-size: var(--t-h3);
+  margin-top: 4px;
+}
+
+.concept-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  padding: 3px;
+}
+
+.concept-tabs [role="tab"] {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 8px 10px;
+  border-radius: var(--r-xs);
+  transition: background var(--d-ui) var(--ease-move), color var(--d-ui) var(--ease-move);
+}
+
+.concept-tabs [role="tab"][aria-selected="true"] {
+  background: var(--violet);
+  color: var(--void);
+}
+
+.concept-panel {
+  display: grid;
+  gap: 10px;
+  padding: 4px 2px;
+}
+
+.concept-analogy {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--violet);
+}
+
+.concept-panel p {
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+.concept-example {
+  border-left: 2px solid var(--rule-bright);
+  padding-left: 12px;
+  color: var(--text-3);
+}
+
+/* lesson ladder */
+
+.lesson-course {
+  display: grid;
+  gap: 18px;
+}
+
+.course-heading-row {
+  display: grid;
+  gap: 4px;
+}
+
+.course-heading-row h3 {
+  font-size: var(--t-h3);
+}
+
+.lesson-ladder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+/* the row stretches its single child so seven cards with different title
+   lengths still end on the same baseline — the copy stays top-aligned */
+.lesson-ladder li {
+  position: relative;
+  display: grid;
+}
+
+.lesson-ladder button,
+.ladder-locked {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  background: var(--deck);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  padding: 12px;
+  color: var(--text-2);
+  font-size: 0.72rem;
+  transition: border-color var(--d-fast) var(--ease-move), transform var(--d-fast) var(--ease-move);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lesson-ladder button:hover {
+    border-color: var(--rule-bright);
+    transform: translateY(-2px);
+  }
+}
+
+.ladder-node {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--rule-bright);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-2);
+  transition: background var(--d-ui) var(--ease-move), color var(--d-ui) var(--ease-move), border-color var(--d-ui) var(--ease-move);
+}
+
+.ladder-copy {
+  display: grid;
+  gap: 3px;
+  line-height: 1.35;
+}
+
+.ladder-copy small {
+  font-size: 0.56rem;
+}
+
+.lesson-ladder [data-course-state="current"] .ladder-node {
+  border-color: var(--signal);
+  color: var(--signal);
+  box-shadow: 0 0 10px -2px var(--signal);
+}
+
+.lesson-ladder [data-logged="true"] .ladder-node {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: var(--on-signal);
+}
+
+.lesson-ladder button[aria-pressed="true"] {
+  border-color: var(--signal);
+}
+
+.lesson-ladder [data-course-state="future"] .ladder-locked {
+  opacity: 0.5;
+}
+
+.lesson-archive-more summary {
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: var(--t-small);
+  padding: 8px 0;
+}
+
+.lesson-archive-more .lesson-ladder {
+  margin-top: 12px;
+}
+
+/* ---------- CH 04 · autopilot ---------- */
+
+.automation-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.automation-copy {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.automation-symbol {
+  color: var(--plasma);
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.clock-dial {
+  width: 48px;
+  height: 48px;
+  display: block;
+}
+
+.automation-copy h3 {
+  font-size: var(--t-h3);
+  margin: 4px 0 8px;
+}
+
+.spec-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.automation-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.automation-next .status-dot {
+  animation: led-breathe 3s ease-in-out infinite alternate;
+}
+
+.automation-next[data-state="paused"] {
+  color: var(--amber);
+}
+
+.automation-next[data-state="paused"] .status-dot {
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+  animation: none;
+}
+
+@keyframes led-breathe {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+
+.pattern-column {
+  grid-column: span 5;
+  align-content: start;
+  display: grid;
+  gap: 4px;
+}
+
+.pattern-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.pattern-list li {
+  display: grid;
+  gap: 8px;
+}
+
+.pattern-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pattern-line strong {
+  font-size: var(--t-small);
+  font-weight: 600;
+}
+
+.pattern-line span {
+  font-size: 0.72rem;
+  color: var(--plasma);
+}
+
+.pattern-list p {
+  font-size: 0.74rem;
+  color: var(--text-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.opportunity-column {
+  grid-column: span 7;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+
+.opportunity-list {
+  display: grid;
+  gap: 12px;
+}
+
+.opportunity {
+  display: grid;
+  gap: 10px;
+  padding: 18px 20px;
+}
+
+.opportunity-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.opportunity-heading h4 {
+  font-size: 1rem;
+}
+
+.state-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--rule-bright);
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.state-label.state-ready,
+.state-label.state-active {
+  color: var(--signal);
+  border-color: color-mix(in oklch, var(--signal) 45%, var(--rule));
+  background: var(--signal-dim);
+}
+
+.state-label.state-candidate {
+  color: var(--plasma);
+  border-color: color-mix(in oklch, var(--plasma) 45%, var(--rule));
+}
+
+.state-label.state-paused {
+  color: var(--amber);
+  border-color: color-mix(in oklch, var(--amber) 45%, var(--rule));
+}
+
+.time-back {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.time-back strong {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--plasma);
+}
+
+.opportunity > p:not(.time-back):not(.mono-line):not(.confidence-row) {
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+.confidence-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.confidence-leds {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.confidence-leds span {
+  width: 14px;
+  height: 8px;
+  border-radius: 1px;
+  background: var(--plasma-dim);
+}
+
+.confidence-leds span.on {
+  background: var(--plasma);
+}
+
+.radar-toggle .radar-icon {
+  display: inline-block;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.radar-toggle[aria-pressed="true"] .radar-icon {
+  animation: radar-lock 480ms var(--ease-entrance);
+}
+
+@keyframes radar-lock {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.5) rotate(90deg);
+  }
+  100% {
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+/* ---------- CH 05 · flight recorder ---------- */
+
+.timeline-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: grid;
+  gap: 22px;
+}
+
+.timeline-list::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: repeating-linear-gradient(
+    var(--rule) 0 8px,
+    transparent 8px 14px
+  );
+}
+
+.timeline-list > li {
+  display: grid;
+  grid-template-columns: 32px auto 1fr auto;
+  gap: 16px;
+  align-items: start;
+}
+
+.timeline-marker {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--deck);
+  border: 1px solid var(--rule-bright);
+  font-size: 0.7rem;
+  z-index: 1;
+}
+
+.timeline-marker.marker-cleanup {
+  color: var(--signal);
+  border-color: var(--signal);
+  box-shadow: 0 0 10px -3px var(--signal);
+}
+
+.timeline-marker.marker-observation {
+  color: var(--plasma);
+  border-color: color-mix(in oklch, var(--plasma) 55%, var(--rule));
+}
+
+.timeline-marker.marker-warning {
+  color: var(--amber);
+  border-color: color-mix(in oklch, var(--amber) 55%, var(--rule));
+}
+
+.timeline-marker.marker-automation {
+  color: var(--violet);
+  border-color: color-mix(in oklch, var(--violet) 55%, var(--rule));
+}
+
+.timeline-list > li > time {
+  display: grid;
+  gap: 2px;
+  font-size: 0.68rem;
+  color: var(--text-3);
+  padding-top: 5px;
+  min-width: 64px;
+}
+
+.timeline-copy {
+  display: grid;
+  gap: 8px;
+  padding: 16px 20px;
+}
+
+.timeline-copy > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.timeline-copy h3 {
+  font-size: 1rem;
+}
+
+.timeline-copy > p {
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+.timeline-details {
+  list-style: none;
+  margin: 0;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  background: var(--well);
+  border-radius: var(--r-xs);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-3);
+  line-height: 1.5;
+}
+
+.timeline-details li {
+  display: block;
+  grid-template-columns: none;
+  gap: 0;
+}
+
+p.timeline-details {
+  display: block;
+}
+
+.timeline-effect {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  text-align: right;
+  padding-top: 5px;
+  min-width: 90px;
+}
+
+.effect-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--signal);
+}
+
+.effect-value.dim {
+  color: var(--text-3);
+}
+
+/* ---------- CH 06 · scope ---------- */
+
+.coverage-panel {
+  grid-column: span 5;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  text-align: center;
+  align-content: start;
+}
+
+/* the coverage dial is the gauge's anatomy in plasma — same 240° sweep, same
+   ticks, same reticle, no unit line under the percentage */
+.coverage-dial {
+  width: min(200px, 100%);
+}
+
+.coverage-dial .dial-readout strong {
+  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 15cqw, 1.9rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--plasma);
+}
+
+.coverage-panel h3 {
+  font-size: var(--t-h3);
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.coverage-figures {
+  margin: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  text-align: left;
+}
+
+.coverage-figures div {
+  display: grid;
+  gap: 6px;
+}
+
+.coverage-figures dd {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.scope-details {
+  grid-column: span 7;
+  display: grid;
+  gap: 22px;
+  align-content: start;
+}
+
+.scope-details h3 {
+  font-size: var(--t-h3);
+  margin-bottom: 10px;
+}
+
+.scope-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.scope-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  font-size: 0.76rem;
+  background: var(--deck-raised);
+}
+
+.scope-chip code {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--text-2);
+}
+
+.scope-chip.in-view .mono-label {
+  color: var(--signal);
+}
+
+.scope-chip.out-view {
+  background:
+    repeating-linear-gradient(45deg, transparent 0 6px, oklch(1 0 0 / 0.03) 6px 8px),
+    var(--well);
+  color: var(--text-3);
+}
+
+.trust-layout {
+  margin-bottom: 20px;
+}
+
+.trust-contract {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.seal-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.seal-card .mono-label {
+  color: var(--plasma);
+}
+
+.seal-card p {
+  font-size: var(--t-small);
+  color: var(--text-2);
+}
+
+/* ---------- skeleton / boot ---------- */
+
+.loading-brief {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+  padding: 40px 0;
+}
+
+.boot-line {
+  font-family: var(--font-mono);
+  font-size: var(--t-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--signal);
+  animation: led-breathe 1s ease-in-out infinite alternate;
+}
+
+.loading-line,
+.loading-block {
+  border: 1px dashed var(--rule-bright);
+  border-radius: var(--r-sm);
+  background: var(--well);
+  animation: skeleton-pulse 1.4s ease-in-out infinite alternate;
+}
+
+.loading-line {
+  height: 16px;
+}
+
+.loading-line-short {
+  width: 30%;
+}
+
+.loading-line-title {
+  height: 40px;
+  width: 65%;
+}
+
+.loading-line-copy {
+  width: 80%;
+}
+
+.loading-columns {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: 16px;
+}
+
+.loading-block {
+  height: 180px;
+}
+
+.loading-block-small {
+  height: 120px;
+}
+
+@keyframes skeleton-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+
+/* ---------- footer ---------- */
+
+.app-footer {
+  border-top: 1px solid var(--rule);
+  padding: 24px 0 40px;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+
+.app-footer p {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.app-footer p strong {
+  color: var(--text-2);
+}
+
+.observe-seal {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--signal);
+  border: 1px solid color-mix(in oklch, var(--signal) 40%, var(--rule));
+  border-radius: var(--r-xs);
+  padding: 4px 10px;
+}
+
+.app-footer a {
+  color: var(--plasma);
+  font-size: var(--t-small);
+}
+
+.noscript-message {
+  width: var(--content);
+  margin: 20px auto;
+  padding: 16px;
+  border: 1px solid var(--amber);
+  border-radius: var(--r-sm);
+  color: var(--amber);
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1040px) {
+  .today-bento .gauge-panel,
+  .today-bento .headline-panel,
+  .today-bento .movement-panel,
+  .today-bento .console-panel,
+  .composition-figure,
+  .trend-panel,
+  .pattern-column,
+  .opportunity-column,
+  .coverage-panel,
+  .scope-details {
+    grid-column: span 12;
+  }
+
+  .stat-tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .daily-lesson {
+    grid-template-columns: 1fr;
+  }
+
+  .channel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .trust-contract {
+    grid-template-columns: 1fr;
+  }
+
+  .masthead {
+    flex-wrap: wrap;
+  }
+
+  .primary-nav {
+    order: 3;
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --content: calc(100vw - 32px);
+  }
+
+  .brief-shell {
+    gap: 44px;
+  }
+
+  .panel,
+  .panel-notch {
+    padding: 16px;
+  }
+
+  .stat-tiles {
+    gap: 12px;
+  }
+
+  .change-list li {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .rack-track {
+    display: none;
+  }
+
+  .category-list {
+    grid-template-columns: 1fr;
+  }
+
+  .project-table-head {
+    display: none;
+  }
+
+  .project-row {
+    grid-template-columns: 1fr auto;
+    row-gap: 6px;
+  }
+
+  .project-bar-cell {
+    grid-column: 1 / -1;
+  }
+
+  .flip-deck {
+    grid-template-columns: 1fr;
+  }
+
+  .flip-card {
+    min-height: 150px;
+  }
+
+  .memory-model {
+    grid-template-columns: 1fr;
+  }
+
+  .conduit {
+    width: 64px;
+    height: 4px;
+  }
+
+  .memory-lab[data-pressure="crowded"] .conduit-pulse {
+    animation: conduit-flow-h 1.4s linear infinite;
+  }
+
+  .conduit-pulse {
+    width: 10px;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+  }
+
+  @keyframes conduit-flow-h {
+    from {
+      transform: translateX(-12px);
+    }
+    to {
+      transform: translateX(66px);
+    }
+  }
+
+  .automation-status {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .timeline-list > li {
+    grid-template-columns: 32px 1fr;
+    row-gap: 8px;
+  }
+
+  .timeline-list > li > time {
+    grid-column: 2;
+    display: flex;
+    gap: 8px;
+  }
+
+  .timeline-copy {
+    grid-column: 1 / -1;
+  }
+
+  .timeline-effect {
+    grid-column: 1 / -1;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .spec-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .loading-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Steward · the character (kit v2) ---------- */
+
+.steward-dock {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+
+  /* one data-state drives the whole pose — face tokens live here.
+
+     The expression sheet is drawn against a 48px face, so the eye tokens are
+     unitless and --u carries both the unit and the badge's own scale: at 48px
+     --u is 1px and the sheet's numbers are literal; at 56px it is 1.1667px and
+     every shape grows by the same factor. Ratios, not absolutes. */
+  --u: 1px;
+  --eye-w: 9;
+  --eye-h: 13;
+  --eye-gap: 7;
+  --eye-o: 1;
+  --eye-color: var(--signal);
+  --mouth-h: 0px;
+  --mouth-w: 50%;
+  --mouth-o: 0;
+  --cell-color: var(--signal);
+}
+
+.steward-dock > * {
+  pointer-events: auto;
+}
+
+.steward-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.steward-row > * {
+  pointer-events: auto;
+}
+
+/* tier 2 · a word */
+.steward-line {
+  margin: 0;
+  max-width: min(230px, calc(100vw - 108px));
+  padding: 7px 10px;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-right: 0;
+  border-radius: var(--r-sm) 0 0 var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--text-2);
+  text-wrap: balance;
+  opacity: 0;
+  transform: translateX(8px);
+  transition: transform 200ms var(--ease-entrance), opacity 200ms var(--ease-entrance);
+}
+
+.steward-line.is-shown {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* the shell covers the line's right edge when he stands up — hand the word to the panel */
+.steward-dock[data-shell="open"] .steward-line {
+  opacity: 0;
+}
+
+/* tier 1 · resting badge */
+.steward-badge {
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: var(--r-sm);
+  transform-origin: 50% 100%;
+  transition: transform 160ms var(--ease-move);
+}
+
+/* tier 3 · he plants his feet and stands up: 48 → 64 */
+.steward-dock[data-shell="open"] .steward-badge {
+  transform: scale(1.3333);
+  animation: steward-stand 260ms var(--ease-entrance);
+}
+
+.steward-body {
+  position: relative;
+  display: block;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 1px 0 var(--panel-sheen), 0 0 20px -8px var(--signal);
+  transform-origin: 50% 100%;
+}
+
+/* phosphor cells — the ramp is D 0.10 · M 0.30 · L 0.62 · H 0.85 */
+.steward-cells {
+  position: absolute;
+  inset: 5px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 4px;
+}
+
+.steward-cells i {
+  display: block;
+  border-radius: 1px;
+  background: var(--cell-color);
+  opacity: 0.1;
+  transition: opacity 180ms var(--ease-move);
+}
+
+.steward-cells i[data-lv="m"] {
+  opacity: 0.3;
+}
+
+.steward-cells i[data-lv="l"] {
+  opacity: 0.62;
+}
+
+.steward-cells i[data-lv="h"] {
+  opacity: 0.85;
+}
+
+/* eyes — deliberately off the cell rhythm so they read as a face, not two lit cells */
+.steward-face {
+  position: absolute;
+  inset: 0;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.steward-eye {
+  position: absolute;
+  top: calc(32% + 5px);
+  width: calc(var(--eye-w) * var(--u));
+  height: calc(var(--eye-h) * var(--u));
+  margin-top: calc(var(--eye-h) * var(--u) / -2);
+  border-radius: 2px;
+  color: var(--eye-color);
+  background: currentColor;
+  opacity: var(--eye-o);
+  box-shadow: 0 0 8px currentColor;
+  transition: height 180ms var(--ease-entrance), width 180ms var(--ease-entrance);
+}
+
+/* the pair is centred on the face, so widening the gap moves both eyes
+   outward rather than sliding the face sideways */
+.steward-eye:first-child {
+  left: calc(50% - var(--eye-gap) * var(--u) / 2 - var(--eye-w) * var(--u));
+}
+
+.steward-eye:last-child {
+  left: calc(50% + var(--eye-gap) * var(--u) / 2);
+}
+
+/* mouth — a dark slot cut into the body, only when the state uses it */
+.steward-mouth {
+  position: absolute;
+  left: calc(50% - var(--mouth-w) / 2);
+  top: 72%;
+  width: var(--mouth-w);
+  height: var(--mouth-h);
+  transform: translateY(-50%);
+  border-radius: 1px;
+  background: var(--void);
+  border: 1px solid var(--rule);
+  opacity: var(--mouth-o);
+  transition: height 180ms var(--ease-entrance), width 180ms var(--ease-entrance), opacity 180ms var(--ease-entrance);
+}
+
+/* scan bar — only while a fetch is in flight */
+.steward-scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: var(--signal);
+  opacity: 0;
+}
+
+.steward-dock[data-state="scanning"] .steward-scan {
+  opacity: 0.8;
+  animation: steward-sweep 900ms linear infinite;
+}
+
+.steward-z {
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  line-height: 1;
+  color: var(--signal);
+  opacity: 0;
+}
+
+.steward-dock[data-state="asleep"] .steward-z {
+  animation: steward-z 3.6s var(--ease-move) infinite;
+}
+
+/* ---- the state bank · pose tokens ---- */
+
+/* in flight · the eyes narrow to 5 wide and the scan bar does the rest */
+.steward-dock[data-state="scanning"] {
+  --eye-w: 5;
+  --mouth-h: 2px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="found"] {
+  --eye-h: 12;
+  --mouth-h: 6px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="counting"] {
+  --mouth-h: 2px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="briefing"] {
+  --eye-h: 9;
+  --mouth-h: 5px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="holding"] {
+  --eye-h: 7;
+  --eye-color: var(--amber);
+  --mouth-h: 2px;
+  --mouth-w: 10px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="refuse-scope"] {
+  --eye-color: var(--amber);
+  --mouth-h: 2px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="refuse-repeat"] {
+  --eye-h: 4;
+  --mouth-h: 2px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="celebrating"] {
+  --eye-h: 12;
+  --eye-color: var(--amber);
+  --mouth-h: 7px;
+  --mouth-o: 1;
+}
+
+/* the charge: he goes still and narrows his eyes while you decide */
+.steward-dock[data-state="charging"] {
+  --eye-h: 7;
+  --eye-color: var(--amber);
+  --mouth-h: 2px;
+  --mouth-w: 12px;
+  --mouth-o: 1;
+}
+
+/* armed: wide open, waiting for the release */
+.steward-dock[data-state="armed"] {
+  --eye-h: 13;
+  --mouth-h: 4px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="asleep"] {
+  --eye-h: 2;
+  --eye-o: 0.5;
+  --mouth-h: 4px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="watching"] {
+  --mouth-h: 2px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="full"] {
+  --eye-h: 9;
+  --eye-color: var(--coral);
+  --cell-color: var(--coral);
+  --mouth-h: 3px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="preview"] {
+  --eye-color: var(--amber);
+  --cell-color: var(--amber);
+  --mouth-h: 4px;
+  --mouth-o: 1;
+}
+
+/* empty-data pose · awake but with nothing to report */
+.steward-dock[data-state="bored"] {
+  --eye-h: 5;
+  --mouth-h: 2px;
+  --mouth-o: 1;
+}
+
+.steward-dock[data-state="logged"] {
+  --eye-h: 12;
+  --mouth-h: 6px;
+  --mouth-o: 1;
+}
+
+/* one blink, after the gaze gives up */
+.steward-dock.is-blink {
+  --eye-h: 2;
+}
+
+/* ---- one motion at a time — a single data-state drives one body animation ---- */
+.steward-dock[data-state="resting"] .steward-body {
+  animation: steward-bob 3.4s ease-in-out infinite;
+}
+
+.steward-dock[data-state="scanning"] .steward-body {
+  animation: steward-jitter 0.5s steps(4) infinite;
+}
+
+.steward-dock[data-state="found"] .steward-body {
+  animation: steward-hop 1.7s var(--ease-entrance) 2;
+}
+
+.steward-dock[data-state="logged"] .steward-body {
+  animation: steward-hop 1.7s var(--ease-entrance) 1;
+}
+
+.steward-dock[data-state="counting"] .steward-body {
+  animation: steward-tick 0.7s ease-in-out infinite;
+}
+
+.steward-dock[data-state="briefing"] .steward-body {
+  animation: steward-stretch-wake 1.2s var(--ease-entrance) 2;
+}
+
+.steward-dock[data-state="refuse-scope"] .steward-body {
+  animation: steward-wobble 0.7s ease-in-out 3;
+}
+
+/* the hold lands with two hops — the only body motion the gesture produces */
+.steward-dock[data-state="holding"] .steward-body {
+  animation: steward-hop 520ms var(--ease-move) 2;
+}
+
+.steward-dock[data-state="celebrating"] .steward-body {
+  animation: steward-ceremony 1.1s var(--ease-entrance) 1;
+}
+
+.steward-dock[data-state="watching"] .steward-body {
+  animation: steward-lean 2.6s ease-in-out infinite alternate;
+}
+
+.steward-dock[data-state="full"] .steward-body {
+  animation: steward-squash 1.9s ease-in-out infinite alternate;
+}
+
+.steward-dock[data-state="asleep"] .steward-body {
+  animation: steward-snore 3.6s ease-in-out infinite alternate;
+}
+
+.steward-dock[data-state="bored"] .steward-body {
+  animation: steward-snore 4.4s ease-in-out infinite alternate;
+}
+
+@keyframes steward-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes steward-jitter {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(1px, -1px);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+  }
+  75% {
+    transform: translate(1px, 1px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes steward-hop {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  12% {
+    transform: translateY(-12px) scale(0.94, 1.08);
+  }
+  30% {
+    transform: translateY(-12px) scale(0.96, 1.05);
+  }
+  44% {
+    transform: translateY(0) scale(1.12, 0.85);
+  }
+  58%,
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+@keyframes steward-tick {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.04);
+  }
+}
+
+@keyframes steward-stretch-wake {
+  0% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(1.06);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes steward-wobble {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(4deg);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+}
+
+/* the ceremony · once ever, 1.1s: launch, land, a smaller second hop, settle */
+@keyframes steward-ceremony {
+  0% {
+    transform: translateY(0) scale(1, 1);
+  }
+  14% {
+    transform: translateY(-14px) scale(0.94, 1.09);
+  }
+  30% {
+    transform: translateY(-30px) scale(0.92, 1.12);
+  }
+  46% {
+    transform: translateY(0) scale(1.14, 0.86);
+  }
+  62% {
+    transform: translateY(-13px) scale(0.96, 1.05);
+  }
+  76% {
+    transform: translateY(0) scale(1.07, 0.94);
+  }
+  88% {
+    transform: translateY(-4px) scale(0.99, 1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+
+/* the checkerboard is the only two-hue cell pattern on the deck */
+.steward-dock[data-state="celebrating"] .steward-cells i:nth-child(odd) {
+  background: var(--violet);
+}
+
+.steward-dock[data-state="celebrating"] .steward-cells i:nth-child(even) {
+  background: var(--plasma);
+}
+
+/* a soft glow behind the dock, only for the ceremony */
+.steward-dock::before {
+  content: "";
+  position: absolute;
+  right: -30px;
+  bottom: -30px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, color-mix(in oklch, var(--violet) 42%, transparent) 0%, transparent 70%);
+}
+
+.steward-dock[data-state="celebrating"]::before {
+  animation: steward-ceremony-glow 1.1s var(--ease-entrance) both;
+}
+
+@keyframes steward-ceremony-glow {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes steward-lean {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-6deg);
+  }
+}
+
+@keyframes steward-squash {
+  from {
+    transform: scale(1.07, 0.88);
+  }
+  to {
+    transform: scale(1.02, 0.95);
+  }
+}
+
+@keyframes steward-snore {
+  from {
+    transform: scale(1, 0.88);
+  }
+  to {
+    transform: scale(1.05, 0.82);
+  }
+}
+
+@keyframes steward-sweep {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(46px);
+  }
+}
+
+@keyframes steward-z {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+}
+
+/* the badge settles; the panel never overshoots */
+@keyframes steward-stand {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.3333);
+  }
+  64% {
+    transform: scale(1.2733);
+  }
+  100% {
+    transform: scale(1.3333);
+  }
+}
+
+/* ---- tier 3 · the shell ---- */
+
+/* the unroll is a clip, not a fade — the panel contents are laid out before he stands up */
+.steward-shell {
+  width: min(320px, calc(100vw - 32px));
+  margin-bottom: 20px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 120ms var(--ease-move);
+}
+
+.steward-dock[data-shell="open"] .steward-shell {
+  max-height: min(460px, 70vh);
+  transition: max-height 90ms var(--ease-entrance) 90ms;
+}
+
+/* the brief panel and the conversation are two stacked wells; the inner column
+   is what caps the shell, so the prompt row can never be pushed out of view */
+.steward-shell-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(460px, 70vh);
+  overflow: hidden;
+}
+
+/* ---- the two panels ----
+   One segmented control over ASK and RECLAIM. Only one panel is mounted-visible
+   at a time; the conversation log inside ASK is never re-created, so switching
+   away and back cannot cost a turn. */
+
+/* two labels and a rule, 50/50 at every width. No fill, no chrome: the
+   underline is the whole state, and the switch has no transition at all —
+   a tab that fades is a tab you wait for. */
+.steward-tabs {
+  display: flex;
+  flex: none;
+  gap: 0;
+}
+
+.steward-tab {
+  flex: 1 1 50%;
+  width: 50%;
+  min-width: 0;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate);
+  box-shadow: inset 0 -1px 0 var(--rule);
+  transition: color var(--d-fast) var(--ease-move);
+}
+
+.steward-tab[aria-selected="true"] {
+  background: transparent;
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 var(--signal);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .steward-tab:hover {
+    color: var(--text-2);
+  }
+}
+
+@media (max-width: 375px) {
+  .steward-tab {
+    height: 40px;
+  }
+}
+
+/* the kit's 34px is a cursor measurement; a finger keeps the floor it had */
+@media (pointer: coarse) {
+  .steward-tab {
+    height: 40px;
+  }
+}
+
+.steward-tabpanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.steward-tabpanel[hidden] {
+  display: none;
+}
+
+.steward-shell-panel {
+  max-height: min(420px, 56vh);
+  overflow-y: auto;
+  padding: 10px;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+.steward-shell-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 0.56rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.steward-caret {
+  color: var(--signal);
+  opacity: 0;
+}
+
+.steward-dock[data-shell="open"] .steward-caret {
+  animation: steward-caret 1s linear 340ms infinite;
+}
+
+@keyframes steward-caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.steward-shell-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* one fixed line per candidate, on a fixed grid: the three columns on the right
+   never move, whatever the name is, so the eye can run straight down the sizes
+   and the caps. The strip is raised out of the recessed panel and squared off —
+   no radius, one hairline. */
+.steward-shell-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px 76px 68px;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 6px;
+  background: var(--deck);
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  border-radius: 0;
+}
+
+.steward-shell-name {
+  grid-area: 1 / 1;
+  display: flex;
+  min-width: 0;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+/* the head gives way; the last path segment is pinned and only clips when it
+   alone cannot fit */
+.steward-name-head {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.steward-name-tail {
+  flex: 0 0 auto;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* a size is a number, never a verdict — it is never coloured */
+.steward-shell-size {
+  grid-area: 1 / 2;
+  justify-self: end;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--text-2);
+}
+
+.steward-shell-hold {
+  grid-area: 1 / 3;
+}
+
+.steward-shell-show {
+  grid-area: 1 / 4;
+}
+
+@media (max-width: 375px) {
+  .steward-shell-row {
+    min-height: 48px;
+  }
+}
+
+.steward-key {
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  background: var(--deck-raised);
+  border: 1px solid var(--rule-bright);
+  border-radius: var(--r-xs);
+  padding: 3px 7px;
+  box-shadow: 0 2px 0 var(--well);
+  transition: transform 90ms var(--ease-move), color var(--d-fast) var(--ease-move), border-color var(--d-fast) var(--ease-move);
+}
+
+.steward-key:active {
+  transform: translateY(2px);
+}
+
+/* ---- press and hold · the fill IS the charge ----
+   640ms of linear scaleX to arm; letting go early drains it in 180ms. The
+   button never fills on its own and never fills faster than the wait. */
+.steward-key > span {
+  position: relative;
+  z-index: 1;
+}
+
+.steward-key::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--signal);
+  opacity: 0.16;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms linear;
+}
+
+.steward-key.is-charging::before {
+  transform: scaleX(1);
+  transition: transform 640ms linear;
+}
+
+.steward-key.is-armed {
+  border-color: var(--signal);
+  color: var(--signal);
+}
+
+.steward-key.is-armed::before {
+  transform: scaleX(1);
+  transition: none;
+}
+
+/* the stamp punches once and leaves. It is placed over the two keys rather than
+   appended after them, so the row keeps its single line while it shows. */
+.steward-stamp {
+  grid-area: 1 / 3 / 2 / 5;
+  justify-self: end;
+  align-self: center;
+  pointer-events: none;
+  background: var(--deck);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--signal);
+  border: 1px solid var(--signal);
+  border-radius: var(--r-xs);
+  padding: 1px 4px;
+  transform-origin: center;
+  animation: steward-stamp 120ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+@keyframes steward-stamp {
+  from {
+    transform: scale(1.6);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.steward-key[aria-pressed="true"] {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+.steward-key[disabled] {
+  opacity: 0.4;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .steward-key:hover {
+    color: var(--signal);
+    border-color: var(--signal);
+  }
+}
+
+/* a finger needs 44px; a cursor does not. The keycap keeps its compact look on
+   fine pointers and grows to a real target wherever the pointer is coarse. */
+@media (pointer: coarse) {
+  .steward-key {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 3px 12px;
+  }
+}
+
+/* ---- the hold cap is a gauge, not a button ----
+
+   At rest a 2px lime floor sits at the bottom of the cap: the tell that this
+   control charges, readable before anything is pressed. The charge is the floor
+   rising to the ceiling over 640ms, linear, bottom-up — the direction a tank
+   fills. The label flips to dark ink at the moment the fill passes it (half the
+   travel, so 320ms in), and early release drops the fill in 120ms with nothing
+   filed. The row never leaves the list: our undo is un-toggling the same cap,
+   and a row that flew away would have nothing left to un-toggle. */
+/* the two caps are fixed boxes so the row never re-flows. Declared after
+   .steward-key on purpose: its `border` shorthand would otherwise reset the
+   border colour these two set. */
+.steward-shell-hold,
+.steward-shell-show {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  overflow: visible;
+  box-shadow: none;
+}
+
+.steward-shell-hold {
+  width: 76px;
+  border-color: var(--slate);
+}
+
+.steward-shell-show {
+  width: 68px;
+  border-color: var(--rule);
+  color: color-mix(in oklch, var(--slate) 62%, var(--text));
+}
+
+/* a 28px cap is the kit's drawing; a finger still needs 44. The hit area is
+   grown with a pseudo-element so the gauge keeps its proportions and the
+   target keeps its size. */
+@media (pointer: coarse) {
+  .steward-shell-hold::after,
+  .steward-shell-show::after {
+    content: "";
+    position: absolute;
+    inset-block: -8px;
+    inset-inline: 0;
+  }
+}
+
+.steward-shell-hold::before {
+  inset: auto 0 0 0;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: var(--signal);
+  opacity: 0.3;
+  transform: none;
+  transition: height 120ms linear, opacity 120ms linear;
+}
+
+.steward-shell-hold.is-charging::before {
+  height: 100%;
+  border-radius: 2px;
+  transition: height 640ms linear;
+}
+
+.steward-shell-hold.is-charging > span {
+  color: var(--on-signal);
+  transition: color 0ms linear 320ms;
+}
+
+.steward-shell-hold.is-armed::before {
+  height: 100%;
+  opacity: 0.85;
+  transition: none;
+}
+
+.steward-shell-hold.is-armed > span {
+  color: var(--on-signal);
+  transition: none;
+}
+
+.steward-shell-empty {
+  margin: 6px 0 0;
+}
+
+/* the affordance line · one dim line, shown once per session under the
+   candidates. Not amber: it teaches a gesture, it does not warn about one.
+   Opacity only, so reduced motion needs no exception for it. */
+.steward-hint {
+  margin: 6px 0 0;
+  color: var(--text-3);
+  animation: steward-fade-in 180ms var(--ease-entrance) both;
+}
+
+@keyframes steward-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* the one status line · what moved since the last reading and how far the
+   history has come, at the foot of the ASK panel. One line, always. */
+.steward-status {
+  flex: none;
+  margin: 0;
+  padding-top: 6px;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  color: var(--slate);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.steward-status[hidden] {
+  display: none;
+}
+
+/* ---- the preroll · the empty state is a reading ----
+   Three dim lines of what was actually measured, so a prompt nobody has typed
+   into yet is still an instrument. Gone at the first turn, for the session. */
+.steward-preroll {
+  flex: none;
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--slate);
+}
+
+.steward-preroll[hidden] {
+  display: none;
+}
+
+.steward-preroll-line {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- the shortcuts · two at most ----
+   Keycaps, not a menu. They are the first thing to go when the shell narrows:
+   the prompt they stand above can always be typed into. */
+.steward-suggest {
+  display: flex;
+  flex: none;
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.steward-suggest[hidden] {
+  display: none;
+}
+
+.steward-suggest-key {
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 22px;
+  min-height: 0;
+  padding: 0 7px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  /* the clip lives on the label so the button can grow a hit area outside itself */
+  overflow: visible;
+  color: color-mix(in oklch, var(--slate) 62%, var(--text));
+}
+
+.steward-suggest-key > span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* the chip keeps the kit's 22px; the finger gets its 44 from a hit extender */
+@media (pointer: coarse) {
+  .steward-suggest-key::after {
+    content: "";
+    position: absolute;
+    inset-block: -11px;
+    inset-inline: 0;
+  }
+}
+
+@media (max-width: 374px) {
+  .steward-suggest {
+    display: none;
+  }
+}
+
+/* ---- tier 3 · the conversation ----
+   Same well as the brief panel, one column below it. The log scrolls inside
+   itself; the prompt row is never part of that scroll. */
+
+.steward-convo {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 10px;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+
+/* the log window is a fixed height, not a share of the viewport: the shell has
+   to be the same instrument every time it opens. 190px at 375, 148px at 320.
+   The top 24px fade says "there is more above" without a scrollbar saying it. */
+.steward-convo-log {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 190px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 24px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 24px);
+}
+
+/* an empty log takes no room at all — the shell opens at its old height */
+.steward-convo-log:empty {
+  display: none;
+}
+
+/* …except while the mode picker is open: it stands above the chip inside the
+   shell's clip, so the column reserves the room rather than letting it be cut */
+.steward-convo.is-picking .steward-convo-log {
+  display: block;
+  min-height: 28px;
+}
+
+.steward-turn {
+  margin: 0 0 12px;
+  animation: steward-turn-in 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.steward-turn:last-child {
+  margin-bottom: 0;
+}
+
+@keyframes steward-turn-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- the anatomy of one turn ----
+
+   you-line 12px · answer 13px · keycap · receipt 10px, and four gaps that are
+   the whole rhythm: 4 under the question, 2 under the answer to the cap, 3 to
+   the receipt, 12 between turns. The question sits in a 30px label gutter, the
+   answer in a 14px marker gutter, and the cap and the receipt indent 20px to
+   land under the answer's own column. */
+
+.steward-turn-you,
+.steward-turn-reply {
+  margin: 0;
+  display: grid;
+  align-items: baseline;
+  overflow-wrap: anywhere;
+}
+
+.steward-turn-you {
+  grid-template-columns: 30px minmax(0, 1fr);
+  font-size: 12px;
+  line-height: 1.35;
+  color: color-mix(in oklch, var(--slate) 62%, var(--text));
+}
+
+.steward-turn-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--slate);
+}
+
+.steward-turn-reply {
+  grid-template-columns: 14px minmax(0, 1fr);
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ---- the epistemic marker ----
+   One glyph in the gutter says how the answer was arrived at. The answer itself
+   is never coloured: colour on a sentence is a second thing to decode. */
+.steward-turn-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 1em;
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* measured · a 4px dot, drawn rather than typeset so it holds its size */
+.steward-turn-mark[data-mark="measured"]::before {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+
+.steward-turn-mark[data-mark="inferred"] {
+  color: color-mix(in oklch, var(--slate) 62%, var(--text));
+}
+
+.steward-turn-mark[data-mark="unavailable"] {
+  color: var(--slate);
+}
+
+.steward-turn-mark[data-mark="simulated"] {
+  color: var(--violet);
+}
+
+/* ---- history compression ----
+   The newest turn keeps its receipt. Older turns hand the room back and are one
+   question and one answer — about 52px each. */
+.steward-receipt {
+  margin: 3px 0 0 20px;
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  color: var(--slate);
+}
+
+.steward-turn:not(:last-child) .steward-receipt {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .steward-turn:hover .steward-receipt {
+    display: block;
+  }
+}
+
+/* a finger has no hover, so a tap on the turn does the same job */
+.steward-turn.is-revealed .steward-receipt {
+  display: block;
+}
+
+/* the fallback is disclosed on the receipt and nowhere else */
+.steward-receipt.is-fallback {
+  margin-left: 16px;
+  padding-left: 3px;
+  border-left: 1px solid var(--amber);
+  color: var(--amber);
+}
+
+.steward-turn-action {
+  margin: 2px 0 0 20px;
+}
+
+.steward-turn-action .steward-key {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  min-height: 0;
+  padding: 0 8px;
+  font-size: 10px;
+}
+
+/* ---- the mode chip ----
+   The strip that owned a full row is one keycap on the prompt row now; the same
+   three radios live in a small picker above it. Hidden entirely when the server
+   has no providers endpoint to answer with. */
+
+.steward-mode {
+  position: relative;
+  display: flex;
+  flex: none;
+}
+
+.steward-mode[hidden] {
+  display: none;
+}
+
+/* ---- the chip's five states ----
+   Local is the only state that colours its own word — the deck's one claim that
+   nothing is leaving. Cloud is a white word with a lime dot: lit, not louder.
+   In flight, a 2px lime sweep runs under it. After a fallback it goes amber for
+   1.6s and comes back; it never stays amber. With no key at all it dims and
+   dashes but stays exactly where it was and stays clickable — the picker behind
+   it is where "no key" is written down. */
+
+.steward-mode-chip {
+  position: relative;
+  letter-spacing: 0.08em;
+  overflow: visible;
+}
+
+/* the chip never charges, so its ::before is free to be the sweep track */
+.steward-mode-chip::before {
+  display: none;
+}
+
+.steward-mode-chip[data-chip-state="local"] {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+.steward-mode-chip[data-chip-state="cloud"] {
+  color: var(--text);
+  border-color: var(--slate);
+  padding-right: 14px;
+}
+
+/* cloud lit · one lime dot, no logo, no provider hue */
+.steward-mode-chip[data-chip-state="cloud"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  width: 4px;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+
+.steward-mode-chip[data-chip-state="no-key"] {
+  opacity: 0.38;
+  border-style: dashed;
+  border-color: var(--slate);
+  color: var(--text-2);
+}
+
+.steward-mode-chip[data-chip-state="fallback"] {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+
+.steward-mode-chip[data-chip-state="in-flight"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 2px;
+  background: var(--signal);
+  transform-origin: left;
+  animation: steward-chip-sweep 900ms linear infinite;
+}
+
+@keyframes steward-chip-sweep {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  50% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  51% {
+    transform: scaleX(1);
+    transform-origin: right;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+}
+
+/* the picker stands above the chip, inside the shell's own clip — one row of
+   keycaps, so it never grows tall enough to be cut off by it */
+.steward-mode-pop {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 2;
+  padding: 8px;
+  background: var(--deck-raised);
+  border: 1px solid var(--rule-bright);
+  border-radius: var(--r-sm);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
+  animation: steward-fade-in 120ms var(--ease-entrance) both;
+}
+
+.steward-mode-pop[hidden] {
+  display: none;
+}
+
+/* one row per engine, each with a note column: a row that cannot be chosen has
+   to say why in words, not only by being dim */
+.steward-mode-keys {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 168px;
+}
+
+.steward-mode-key {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 28px;
+  text-align: left;
+}
+
+.steward-mode-note {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  color: var(--slate);
+}
+
+.steward-mode-key[aria-checked="true"] {
+  color: var(--signal);
+  border-color: var(--signal);
+}
+
+/* the dim plus the note is the whole message: no key, no mode */
+.steward-mode-key[disabled] {
+  opacity: 0.38;
+}
+
+/* ---- the consent gate ----
+   A panel in the deck's own material, not a browser dialog: the words have to
+   be read in the same place the choice is made. */
+
+.steward-consent {
+  flex: none;
+}
+
+.steward-consent[hidden] {
+  display: none;
+}
+
+/* the shell is a fixed box, so the panel takes the column while the question is
+   open: the brief and the log step aside rather than push the choice out of
+   view, and anything still too tall scrolls inside the panel itself */
+.steward-shell-inner.is-consenting .steward-shell-panel,
+.steward-shell-inner.is-consenting .steward-convo-log,
+.steward-shell-inner.is-consenting .steward-preroll,
+.steward-shell-inner.is-consenting .steward-suggest,
+.steward-shell-inner.is-consenting .steward-status,
+.steward-shell-inner.is-consenting .steward-tabs {
+  display: none;
+}
+
+/* no amber and no icons: a panel that looks like a warning gets dismissed like
+   one. This is a sentence to read, a table to inspect, and two equal choices. */
+.steward-consent-panel {
+  display: grid;
+  gap: 8px;
+  max-height: min(360px, 46vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-top: 8px;
+  padding: 10px;
+  background: var(--deck);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  animation: steward-fade-in 180ms var(--ease-entrance) both;
+}
+
+.steward-consent-panel p {
+  margin: 0;
+}
+
+.steward-consent-head {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+.steward-consent-provider {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+/* the headline · body type at reading size. The two phrases that decide the
+   answer are one weight step up, and nothing else is doing any work. */
+.steward-consent-headline {
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.steward-consent-strong {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.steward-consent-line {
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+/* the retention wording is the truth we can stand behind, not the reassuring
+   version — so it is set plainly and given no emphasis at all */
+.steward-consent-retention {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.45;
+  color: color-mix(in oklch, var(--slate) 62%, var(--text));
+}
+
+/* the packet, as text, in its own scroller — nothing here is interpreted */
+.steward-consent-well {
+  max-height: 110px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-xs);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.steward-consent-well[hidden] {
+  display: none;
+}
+
+/* two columns, fixed: the eye runs down the ids and the values clip */
+.steward-consent-row {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  margin: 0;
+  padding: 0 6px;
+}
+
+.steward-consent-id {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--slate);
+}
+
+.steward-consent-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-2);
+}
+
+/* two choices of equal size and equal weight, side by side at every width.
+   ALLOW is a lime hairline and lime text — never a filled button: a filled
+   default is a thumb heading for it before the sentence has been read. */
+.steward-consent-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.steward-consent-actions .steward-key {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  min-height: 0;
+  min-width: 0;
+  padding: 0 8px;
+}
+
+.steward-consent-allow {
+  color: var(--signal);
+  border-color: var(--signal);
+  background: var(--deck-raised);
+}
+
+.steward-consent-cancel {
+  color: var(--text-2);
+  border-color: var(--slate);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .steward-consent-cancel:hover {
+    color: var(--text);
+    border-color: var(--rule-bright);
+  }
+}
+
+@media (max-width: 375px) {
+  .steward-consent-actions .steward-key {
+    height: 48px;
+  }
+}
+
+.steward-consent-allow[aria-disabled="true"],
+.steward-consent-allow[disabled] {
+  opacity: 0.45;
+}
+
+.steward-prompt {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in oklch, var(--rule) 55%, transparent);
+}
+
+.steward-prompt-mark {
+  flex: none;
+  color: var(--signal);
+}
+
+.steward-prompt-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 4px 2px;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--rule-bright);
+  border-radius: 0;
+}
+
+.steward-prompt-input::placeholder {
+  color: var(--text-3);
+}
+
+.steward-prompt-input:disabled,
+.steward-ask-key:disabled {
+  opacity: 0.45;
+}
+
+.steward-offline {
+  flex: none;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in oklch, var(--rule) 55%, transparent);
+  color: var(--text-3);
+}
+
+/* a finger needs a real target; a cursor keeps the compact row */
+@media (pointer: coarse) {
+  .steward-prompt-input {
+    min-height: 44px;
+  }
+}
+
+/* ---- expression · a temporary read, eyes only ----
+   data-state owns the body, the grid and the pose; this attribute may only
+   move the eyes, and JS removes it after ~7s. It is declared after the state
+   bank so it wins the tie on equal specificity. */
+
+/* calm · 9×13, the resting read. The blink is the only ambient motion on the
+   face and it runs while you type: typing is not an event he reacts to. */
+.steward-dock[data-expression="calm"] {
+  --eye-w: 9;
+  --eye-h: 13;
+  --eye-color: var(--signal);
+}
+
+.steward-dock[data-expression="calm"] .steward-eye,
+.steward-dock[data-state="resting"]:not([data-expression]) .steward-eye {
+  animation: steward-eye-blink 5.2s linear infinite;
+}
+
+/* pleased · 9×7, a squint. 260ms in, then 1.4s of holding it. */
+.steward-dock[data-expression="pleased"] {
+  --eye-w: 9;
+  --eye-h: 7;
+  --eye-color: var(--signal);
+}
+
+.steward-dock[data-expression="pleased"] .steward-eye {
+  transition-duration: 260ms;
+}
+
+/* watchful · 9×17, wide open and deliberately not blinking */
+.steward-dock[data-expression="watchful"] {
+  --eye-w: 9;
+  --eye-h: 17;
+}
+
+/* concerned · 7×13 amber, the gap widens and a soft glow rises once */
+.steward-dock[data-expression="concerned"],
+.steward-dock[data-expression="fallback"] {
+  --eye-w: 7;
+  --eye-h: 13;
+  --eye-gap: 11;
+  --eye-color: var(--amber);
+}
+
+.steward-dock[data-expression="concerned"] .steward-eye,
+.steward-dock[data-expression="fallback"] .steward-eye {
+  animation: steward-eye-glow 1.8s ease-in-out 1;
+}
+
+/* unavailable · 9×2 slate, static, and it holds until the next question.
+   Like `fallback` it sits outside the server allowlist — no envelope can ask
+   for the face of an answer it did not fail to give. */
+.steward-dock[data-expression="unavailable"] {
+  --eye-w: 9;
+  --eye-h: 2;
+  --eye-color: var(--slate);
+}
+
+@keyframes steward-eye-blink {
+  0%,
+  96.5% {
+    height: calc(var(--eye-h) * var(--u));
+    margin-top: calc(var(--eye-h) * var(--u) / -2);
+  }
+  98% {
+    height: calc(2 * var(--u));
+    margin-top: calc(-1 * var(--u));
+  }
+  100% {
+    height: calc(var(--eye-h) * var(--u));
+    margin-top: calc(var(--eye-h) * var(--u) / -2);
+  }
+}
+
+@keyframes steward-eye-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 16px currentColor;
+  }
+}
+
+@media (max-width: 760px) {
+  .steward-dock {
+    right: 12px;
+    bottom: 12px;
+  }
+}
+
+/* ---------- mobile ergonomics ---------- */
+
+@media (max-width: 480px) {
+  /* the dock clears the thumb rail and the shell opens upward into the deck */
+  .steward-dock {
+    right: 18px;
+    bottom: 96px;
+  }
+
+  .steward-badge,
+  .steward-body {
+    width: 56px;
+    height: 56px;
+  }
+
+  /* the face grows with the badge: 56/48 = 1.1667, applied to every eye shape
+     at once so the expression sheet keeps its proportions */
+  .steward-dock {
+    --u: 1.1667px;
+  }
+
+  .steward-cells {
+    gap: 5px;
+  }
+
+  /* one line, never two — the panel carries anything longer */
+  .steward-line {
+    max-width: 212px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-wrap: nowrap;
+  }
+
+  /* he grows 56 → 74 when he stands up, from a 50% 100% origin: the gap has to
+     clear the ~19px he gains upward or the panel sits on his head */
+  .steward-shell {
+    width: min(300px, calc(100vw - 36px));
+    margin-bottom: 30px;
+  }
+
+  .steward-dock[data-shell="open"] .steward-shell {
+    max-height: 62vh;
+  }
+
+  .steward-shell-inner {
+    max-height: 62vh;
+  }
+
+  /* the candidates and the log are on separate tabs now, so neither has to
+     leave room for the other — each takes what 62vh can give it */
+  .steward-shell-panel {
+    max-height: 46vh;
+  }
+
+  /* the log window is a fixed height at every phone width — the shell has to
+     be the same instrument each time it opens, not a share of the viewport */
+  .steward-convo-log {
+    max-height: 190px;
+  }
+
+  /* the scope needs a pointer and horizontal room; the strip carries the same
+     readings without either */
+  .scope {
+    display: none;
+  }
+
+  .trend-strip {
+    display: flex;
+  }
+}
+
+/* the narrowest column the deck supports: the log gives up 42px so the prompt
+   row and the status line are never the thing that scrolls away */
+@media (max-width: 320px) {
+  .steward-convo-log {
+    max-height: 148px;
+  }
+}
+
+/* ---------- reduced motion: gentler, not zero ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* kill ambient loops and travel */
+  .brand-led,
+  .scan-state.is-reading .status-dot,
+  .automation-next .status-dot,
+  .scan-dot,
+  .radar-ping span,
+  .conduit-pulse,
+  .cursor,
+  .boot-line,
+  .boot-sweep.is-running,
+  .radar-toggle[aria-pressed="true"] .radar-icon,
+  .burst-stage i,
+  .scope-sweep,
+  .seg.is-band-alert span::after,
+  .steward-dock[data-state="celebrating"]::before,
+  .loading-line,
+  .loading-block {
+    animation: none !important;
+  }
+
+  /* the sweep is ambient — it goes; the trace and the scrub both stay */
+  .scope-sweep {
+    display: none;
+  }
+
+  /* the band alert still says amber, it just does not travel */
+  .seg.is-band-alert span::after {
+    opacity: var(--lit-dim);
+  }
+
+  .seg.is-band-alert span.on::after {
+    opacity: var(--lit);
+  }
+
+  .seg.is-band-alert span.is-last::after {
+    opacity: var(--lit-hi);
+  }
+
+  /* the ceremony glow rests at its settled value instead of blooming */
+  .steward-dock[data-state="celebrating"]::before {
+    opacity: 0.25;
+  }
+
+  /* scrub is data inspection, so it keeps working — only its travel is dropped */
+  .scope-cross,
+  .scope-chip,
+  .scope[data-scrub="on"] .scope-col {
+    transition: none;
+  }
+
+  /* the charge has no ceremony left: the gauge stays at its resting floor for
+     the whole 640ms wait and steps to full in one 120ms move at the moment it
+     actually arms. It never travels, and never claims to be armed before it is. */
+  .steward-key::before,
+  .steward-key.is-charging::before,
+  .steward-key.is-armed::before {
+    transition: none;
+  }
+
+  .steward-key.is-charging:not(.is-armed)::before {
+    transform: scaleX(0);
+  }
+
+  .steward-shell-hold.is-charging:not(.is-armed)::before {
+    height: 2px;
+  }
+
+  .steward-shell-hold.is-charging:not(.is-armed) > span {
+    color: inherit;
+  }
+
+  .steward-shell-hold.is-armed::before {
+    height: 100%;
+    transition: height 120ms linear;
+  }
+
+  .steward-stamp {
+    animation: none;
+  }
+
+  /* a new turn still arrives, it just does not travel */
+  @keyframes steward-turn-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* the briefing reports all at once */
+  #today[data-briefing] [data-reveal].is-in {
+    transition-delay: 0ms;
+  }
+
+  /* force final states of draw-ins immediately */
+  html.has-js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  html.has-js [data-reveal] .rack-bar,
+  html.has-js [data-reveal] .comp-seg {
+    transform: scaleX(1);
+    transition: none;
+  }
+
+  /* every cell arrives lit in one frame — no stagger, no scaleY */
+  html.has-js [data-reveal] .seg span,
+  html.has-js [data-reveal].is-in .seg span {
+    opacity: var(--lit-dim);
+    transform: none;
+    transition: none;
+  }
+
+  html.has-js [data-reveal] .seg span.on,
+  html.has-js [data-reveal].is-in .seg span.on {
+    opacity: var(--lit);
+  }
+
+  html.has-js [data-reveal] .seg span.is-second,
+  html.has-js [data-reveal].is-in .seg span.is-second {
+    opacity: var(--lit-mid);
+  }
+
+  html.has-js [data-reveal] .seg span.is-last,
+  html.has-js [data-reveal].is-in .seg span.is-last {
+    opacity: var(--lit-hi);
+  }
+
+  html.has-js [data-reveal] .seg-marks,
+  html.has-js [data-reveal].is-in .seg-marks {
+    opacity: 1;
+    transition: none;
+  }
+
+  .dial-value {
+    stroke-dashoffset: 0 !important;
+    transition: none !important;
+  }
+
+  /* the reticle arrives with the arc rather than fading in behind it */
+  html.has-js [data-reveal] .dial-reticle,
+  html.has-js [data-reveal].is-in .dial-reticle {
+    opacity: 1;
+    transition: none !important;
+  }
+
+  /* keep comprehension transitions, shorten travel */
+  .panel,
+  .lesson-ladder button {
+    transition: border-color var(--d-fast) var(--ease-move);
+  }
+
+  .panel:hover,
+  .lesson-ladder button:hover {
+    transform: none;
+  }
+
+  .flip-inner {
+    transition: none;
+    transform-style: flat;
+  }
+
+  .flip-card.is-flipped .flip-inner {
+    transform: none;
+  }
+
+  .flip-face {
+    backface-visibility: visible;
+    transition: opacity 120ms var(--ease-move);
+  }
+
+  .flip-back {
+    transform: none;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .flip-card.is-flipped .flip-front {
+    opacity: 0;
+  }
+
+  .flip-card.is-flipped .flip-back {
+    opacity: 1;
+  }
+
+  .resource-slots span {
+    transition: background 120ms var(--ease-move), opacity 120ms var(--ease-move);
+    transform: none;
+  }
+
+  .resource-slots span.is-filled {
+    transform: none;
+  }
+
+  .recommendation[open] .recommendation-body {
+    animation: none;
+  }
+
+  /* Steward · static pose sheet. Every state keeps its meaning with zero motion:
+     the cell pattern, the mouth and 75%-height eyes still carry the state. */
+  .steward-body,
+  .steward-scan,
+  .steward-z,
+  .steward-badge,
+  .steward-caret {
+    animation: none !important;
+  }
+
+  .steward-dock[data-state="scanning"] .steward-scan {
+    opacity: 0.8;
+  }
+
+  .steward-caret {
+    opacity: 1;
+  }
+
+  .steward-badge {
+    transition: none;
+  }
+
+  /* no gaze, no blink travel */
+  .steward-face {
+    transform: none !important;
+    transition: none;
+  }
+
+  /* the shapes stay, the motion goes: no blink, no glow, no sweep. Every state
+     still reads from its own silhouette and its own colour. */
+  .steward-eye {
+    height: calc(var(--eye-h) * var(--u) * 0.75);
+    margin-top: calc(var(--eye-h) * var(--u) * -0.375);
+    transition: none;
+    animation: none !important;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .steward-mode-chip[data-chip-state="in-flight"]::after {
+    animation: none;
+    transform: none;
+  }
+
+  .steward-cells i {
+    transition: none;
+  }
+
+  .steward-line {
+    transform: none;
+    transition: opacity 120ms var(--ease-move);
+  }
+
+  .steward-line.is-shown {
+    transform: none;
+  }
+
+  .steward-mouth {
+    transition: opacity 120ms var(--ease-move);
+  }
+
+  .steward-shell,
+  .steward-dock[data-shell="open"] .steward-shell {
+    transition: none;
+  }
+}
+
+/* ---------- print ---------- */
+
+@media print {
+  :root {
+    --void: #fff;
+    --deck: #fff;
+    --deck-raised: #f4f4f4;
+    --well: #f4f4f4;
+    --text: #000;
+    --text-2: #222;
+    --text-3: #444;
+  }
+
+  .grid-field,
+  .boot-sweep,
+  .app-header,
+  .app-footer,
+  .switch-control,
+  .keycap,
+  .text-action {
+    display: none !important;
+  }
+
+  html.has-js [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ---------- Steward · the cold console (kit "Terminal Spaces v2" · phase 1) ----------
+
+   A full-viewport surface in the deck's own material. Three columns and one
+   rule: the rail never collapses. Below the width that holds it the console is
+   not offered at all, which is why the door itself is hidden rather than the
+   rail being folded away.
+
+   The amber budget for this whole surface is the rail — the watch dot that has
+   grown, and the count of readouts nobody has looked at yet. Nothing else in
+   here is allowed to be amber. */
+
+:root {
+  /* the one typewriter rate, in characters per second. JS reads this value, so
+     the speed is tunable from the stylesheet without touching the module. */
+  --cc-cps: 38;
+  --cc-rail: 186px;
+  --cc-spine: 30px;
+  /* the open spine, exactly as the kit specifies it. The log column is the
+     grid's only flexible track, so this width is taken from the log and the
+     log reflows — nothing in the console ever overlaps. */
+  --cc-spine-open: 262px;
+}
+
+/* the door · it rides beside the shell's two tabs */
+.steward-tabrow {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.steward-tabrow .steward-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.steward-expand {
+  flex: none;
+  align-self: center;
+  height: 24px;
+  padding: 0 9px;
+  border-color: var(--slate);
+}
+
+.steward-expand[hidden] {
+  display: none;
+}
+
+/* the consent gate takes the whole shell column, and the door goes with the
+   tabs it stands beside */
+.steward-shell-inner.is-consenting .steward-tabrow {
+  display: none;
+}
+
+/* ---- the overlay ---- */
+
+html.has-console,
+html.has-console body {
+  overflow: hidden;
+}
+
+.cold-console {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--deck);
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.cold-console[hidden] {
+  display: none;
+}
+
+/* ---- the header ----
+   name · mood · the reading's own clock · the engine. The scan bar between it
+   and `esc to leave` runs while a command runs and stops on the first
+   character revealed, not the last. */
+
+.cc-head {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(60px, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--well);
+}
+
+.cc-title {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cc-scan {
+  position: relative;
+  height: 2px;
+  overflow: hidden;
+  background: color-mix(in oklch, var(--rule) 60%, transparent);
+}
+
+.cc-scan i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 24%;
+  background: var(--signal);
+  opacity: 0;
+}
+
+.cc-scan.is-running i {
+  opacity: 0.85;
+  animation: cc-sweep 900ms linear infinite;
+}
+
+/* reduced motion keeps the bar as a reading, parked at its 24% */
+.cc-scan.is-parked i {
+  opacity: 0.85;
+}
+
+/* the bar is 24% of the track, so one lap is 124% of the track — 516.7% of
+   itself. Written as a ratio so the two numbers can never drift apart. */
+@keyframes cc-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(416.7%); }
+}
+
+.cc-leave {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--slate);
+  white-space: nowrap;
+}
+
+/* ---- the three columns ---- */
+
+.cc-body {
+  display: grid;
+  grid-template-columns: var(--cc-rail) minmax(0, 1fr) var(--cc-spine);
+  min-height: 0;
+  transition: grid-template-columns 180ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+/* the spine's whole geometry is this one line: the third track grows, the
+   middle track gives up exactly that much, and every child reflows because it
+   was already sized from its track rather than from the viewport */
+.cold-console[data-spine="open"] .cc-body {
+  grid-template-columns: var(--cc-rail) minmax(0, 1fr) var(--cc-spine-open);
+}
+
+/* ---- the rail ---- */
+
+.cc-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: var(--cc-rail);
+  min-width: 0;
+  padding: 16px 14px;
+  border-right: 1px solid var(--rule);
+  background: var(--well);
+  overflow-y: auto;
+}
+
+.cc-rail-block {
+  display: block;
+}
+
+.cc-rail-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+/* the one amber in the console, with the watch dot: how many readouts are
+   still unseen. Once each has been opened the word is `clear`, in slate. */
+.cc-rail-count[data-state="unseen"] {
+  color: var(--amber);
+}
+
+.cc-rail-count[data-state="clear"] {
+  color: var(--slate);
+}
+
+.cc-rail-empty {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: color-mix(in oklch, var(--slate) 46%, transparent);
+}
+
+.cc-watch {
+  display: grid;
+  grid-template-columns: 5px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 6px;
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+.cc-watch-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-watch-share {
+  font-size: 10px;
+  color: var(--slate);
+}
+
+.cc-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--signal);
+}
+
+.cc-watch[data-state="slate"] .cc-dot {
+  background: var(--slate);
+}
+
+.cc-watch[data-state="amber"] .cc-dot {
+  background: var(--amber);
+  animation: cc-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes cc-glow {
+  0%, 100% { box-shadow: 0 0 0 var(--amber); }
+  50% { box-shadow: 0 0 7px var(--amber); }
+}
+
+.cc-wait {
+  display: block;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: left;
+  color: var(--amber);
+  transition: color var(--d-fast) var(--ease-move);
+}
+
+.cc-wait[data-seen="true"] {
+  color: var(--slate);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cc-wait:hover {
+    color: var(--text);
+  }
+}
+
+/* ---- his block · 46px, in the rail's bottom corner ---- */
+
+.cc-him {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+/* the same eye maths the badge uses, at 46px: the tokens are unitless and --u
+   carries the scale, so nothing here is a second drawing of the same face. */
+.cc-face {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 46px;
+  overflow: hidden;
+  background: var(--well);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 1px 0 var(--panel-sheen);
+  --u: 0.958px;
+  --eye-w: 9;
+  --eye-h: 13;
+  --eye-gap: 7;
+  --eye-o: 1;
+  --eye-color: var(--signal);
+  --mouth-h: 0px;
+  --mouth-w: 50%;
+  --mouth-o: 0;
+}
+
+.cc-eye {
+  position: absolute;
+  top: calc(32% + 5px);
+  width: calc(var(--eye-w) * var(--u));
+  height: calc(var(--eye-h) * var(--u));
+  margin-top: calc(var(--eye-h) * var(--u) / -2);
+  border-radius: 2px;
+  color: var(--eye-color);
+  background: currentColor;
+  opacity: var(--eye-o);
+  box-shadow: 0 0 8px currentColor;
+  transition: height 180ms var(--ease-entrance), width 180ms var(--ease-entrance);
+}
+
+.cc-eye:first-child {
+  left: calc(50% - var(--eye-gap) * var(--u) / 2 - var(--eye-w) * var(--u));
+}
+
+.cc-eye:nth-child(2) {
+  left: calc(50% + var(--eye-gap) * var(--u) / 2);
+}
+
+.cc-mouth {
+  position: absolute;
+  left: calc(50% - var(--mouth-w) / 2);
+  top: 72%;
+  width: var(--mouth-w);
+  height: var(--mouth-h);
+  transform: translateY(-50%);
+  border-radius: 1px;
+  background: var(--void);
+  border: 1px solid var(--rule);
+  opacity: var(--mouth-o);
+  transition: height 180ms var(--ease-entrance), opacity 180ms var(--ease-entrance);
+}
+
+.cc-face[data-mood="listening"] {
+  --eye-h: 14;
+  --mouth-h: 2px;
+  --mouth-o: 1;
+}
+
+.cc-face[data-mood="scanning"] {
+  --eye-w: 5;
+  --mouth-h: 2px;
+  --mouth-o: 1;
+}
+
+.cc-face[data-mood="watchful"] {
+  --eye-h: 7;
+  --mouth-h: 2px;
+  --mouth-w: 12px;
+  --mouth-o: 1;
+}
+
+.cc-face[data-mood="pleased"] {
+  --eye-h: 12;
+  --mouth-h: 6px;
+  --mouth-o: 1;
+}
+
+.cc-mood {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--slate);
+}
+
+/* ---- the middle column ---- */
+
+.cc-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px 20px 14px;
+}
+
+.cc-log {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.cc-log:focus {
+  outline: none;
+}
+
+.cc-system {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--slate);
+}
+
+.cc-turn {
+  margin: 0 0 16px;
+}
+
+.cc-turn-you {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: baseline;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  color: color-mix(in oklch, var(--slate) 62%, var(--text));
+}
+
+.cc-turn-label {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--slate);
+}
+
+.cc-turn-reply {
+  margin: 4px 0 0;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  align-items: baseline;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+
+.cc-turn-extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 0 20px;
+}
+
+.cc-turn-extra .steward-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  min-height: 0;
+  padding: 0 12px;
+  border-color: var(--slate);
+}
+
+/* a turn that does not match the /find term is dimmed, never hidden: the log
+   is a record, and a filter that deletes rows is a filter you cannot check */
+.cc-turn.is-dim {
+  opacity: 0.35;
+}
+
+.cc-receipt {
+  margin: 3px 0 0 20px;
+  font-size: 10px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  color: var(--slate);
+}
+
+/* ---- the caret · 7×15, at the reveal head, back to the prompt when done ---- */
+
+.cc-caret {
+  display: inline-block;
+  width: 7px;
+  height: 15px;
+  background: var(--signal);
+  vertical-align: text-bottom;
+  animation: cc-blink 1.1s steps(1, end) infinite;
+}
+
+@keyframes cc-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ---- the instruments ----
+   Nothing here moves until the sentence and its receipt are both standing;
+   then the cells light 18ms apart, exactly as the deck's bars do. */
+
+.cc-inst {
+  margin: 10px 0 0 20px;
+  max-width: 420px;
+}
+
+.cc-inst-label {
+  margin: 6px 0 0;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--slate);
+}
+
+.cc-inst .seg span {
+  opacity: 0;
+  transform: scaleY(0.3);
+}
+
+.cc-inst.is-lit .seg span {
+  opacity: var(--lit-dim);
+  transform: scaleY(1);
+  transition:
+    opacity 220ms cubic-bezier(0.2, 0.9, 0.2, 1) calc(var(--k, 0) * var(--sd, 18ms)),
+    transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1) calc(var(--k, 0) * var(--sd, 18ms));
+}
+
+.cc-inst.is-lit .seg span.on { opacity: var(--lit); }
+.cc-inst.is-lit .seg span.is-last { opacity: var(--lit-hi); }
+
+/* the scope · a fixed twelve-slot grid, one column per reading. Two readings
+   draw two columns and leave ten empty — the honest shape of a short history. */
+.cc-scope {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  align-items: end;
+  gap: 3px;
+  height: 44px;
+}
+
+.cc-scope-col {
+  height: calc(var(--h, 6) * 1%);
+  border-radius: 1px;
+  background: var(--signal);
+  opacity: 0;
+  transform: scaleY(0.3);
+  transform-origin: 50% 100%;
+}
+
+.cc-scope-col.is-now {
+  background: var(--plasma);
+}
+
+.cc-inst.is-lit .cc-scope-col {
+  opacity: var(--lit);
+  transform: scaleY(1);
+  transition:
+    opacity 220ms cubic-bezier(0.2, 0.9, 0.2, 1) calc(var(--k, 0) * var(--sd, 18ms)),
+    transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1) calc(var(--k, 0) * var(--sd, 18ms));
+}
+
+.cc-inst.is-lit .cc-scope-col.is-now {
+  opacity: var(--lit-hi);
+}
+
+/* the block table · name, size, delta */
+.cc-table {
+  margin-top: 12px;
+}
+
+.cc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 74px 58px;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 11px;
+  color: var(--text-2);
+  border-bottom: 1px solid color-mix(in oklch, var(--rule) 55%, transparent);
+  opacity: 0;
+}
+
+.cc-row-mode {
+  grid-template-columns: minmax(0, 1fr) 132px;
+}
+
+.cc-inst.is-lit .cc-row,
+.cc-inst.is-lit .cc-more {
+  opacity: 1;
+  transition: opacity 220ms cubic-bezier(0.2, 0.9, 0.2, 1) calc(var(--k, 0) * var(--sd, 18ms));
+}
+
+.cc-cell-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-cell-size,
+.cc-cell-note {
+  font-size: 10px;
+  color: var(--slate);
+  text-align: right;
+}
+
+.cc-cell-note {
+  text-align: left;
+}
+
+.cc-cell-delta {
+  font-size: 10px;
+  text-align: right;
+  color: var(--slate);
+}
+
+.cc-cell-delta[data-dir="up"] {
+  color: var(--signal);
+}
+
+.cc-cell-delta[data-dir="down"] {
+  color: var(--plasma);
+}
+
+/* the overflow line is live now: it opens the rest of the deltas in the spine.
+   It stays dim — the rows it hides are the small ones — but it is a button, so
+   it takes a caret, a hover and a focus ring like every other control. */
+.cc-more {
+  display: block;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-align: left;
+  color: color-mix(in oklch, var(--slate) 55%, transparent);
+  opacity: 0;
+}
+
+button.cc-more {
+  cursor: pointer;
+}
+
+button.cc-more:hover,
+button.cc-more:focus-visible {
+  color: var(--text-2);
+  text-decoration: underline;
+}
+
+/* ---- the palette ---- */
+
+.cc-palette {
+  flex: none;
+  max-height: 190px;
+  margin-bottom: 8px;
+  overflow-y: auto;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  background: var(--well);
+}
+
+.cc-palette[hidden] {
+  display: none;
+}
+
+.cc-pal-row {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-align: left;
+  color: var(--text-2);
+}
+
+.cc-pal-row[aria-selected="true"] {
+  background: var(--signal-dim);
+  color: var(--text);
+}
+
+.cc-pal-note {
+  color: var(--slate);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cc-pal-row:hover {
+    color: var(--text);
+  }
+}
+
+/* ---- the prompt ---- */
+
+.cc-prompt {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+
+.cc-prompt-mark {
+  flex: none;
+  font-size: 12px;
+  color: var(--signal);
+}
+
+/* the field carries the input's own metrics, not the body's: the caret and the
+   ghost are positioned in `ch`, and a `ch` measured against 15.2px mono while
+   the text advances at 13px drifts the caret a character to the right every
+   eight or so typed. One size here, inherited by everything in the field. */
+.cc-field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 18px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.cc-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text);
+  /* the 7×15 block below is the caret; two carets in one field is one too many */
+  caret-color: transparent;
+}
+
+.cc-input:focus {
+  outline: none;
+}
+
+/* the ghost sits ahead of the caret at 0.38 — a suggestion, never a value */
+.cc-ghost {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  left: calc(var(--n, 0) * 1ch);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text);
+  opacity: 0.38;
+  white-space: pre;
+}
+
+.cc-field > .cc-caret {
+  position: absolute;
+  top: 2px;
+  left: calc(var(--n, 0) * 1ch);
+  vertical-align: baseline;
+  pointer-events: none;
+}
+
+.cc-field > .cc-caret[hidden],
+.cc-field > .cc-caret.is-off {
+  display: none;
+}
+
+/* ---- the evidence spine ----
+
+   Closed it is a wordmark in a 30px gutter and takes no pointer events at all —
+   there is nothing to hover, because hovering is not one of the two gestures
+   that may open it. Open it is a 262px column of cards, and the only control
+   inside it closes it again. */
+
+.cc-spine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  background: var(--well);
+  overflow: hidden;
+}
+
+.cc-spine[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+.cc-spine-word {
+  margin: 0;
+  writing-mode: vertical-rl;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: lowercase;
+  color: color-mix(in oklch, var(--slate) 50%, transparent);
+}
+
+.cold-console[data-spine="open"] .cc-spine {
+  align-items: stretch;
+}
+
+.cold-console[data-spine="open"] .cc-spine-word {
+  display: none;
+}
+
+.cc-spine-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: var(--cc-spine-open);
+  padding: 12px 12px 10px;
+}
+
+.cc-spine-pane[hidden] {
+  display: none;
+}
+
+.cc-spine-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.cc-spine-title {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+
+.cc-spine-close {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--slate);
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cc-spine-close:hover {
+  color: var(--text);
+  border-color: var(--slate);
+}
+
+.cc-spine-stack {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  padding-top: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---- one card ----
+   A flat deck slab on the well — no outline, no left accent; the 10px gap in
+   the stack is the only separation a card needs, and the step from --well to
+   --deck is the only edge. What a card is gets said in its tag rather than
+   drawn around it: lime for anything read off the collector's own file, violet
+   for an unpacking — the same violet the simulated marker uses in the log
+   gutter. Both hues are pulled 15% toward the theme's own ink so 9px uppercase
+   clears 4.5:1 on --deck in both shifts — measured off the rendered pixels:
+   night 12.24 lime / 7.55 violet, day 4.82 / 7.99. The mix is oklab, not
+   oklch: an oklch mix rotates hue toward the ink and turns the day lime green
+   by 70%, where oklab drops chroma and holds the hue inside 1°. Untouched, the
+   day lime is #6f8f14 on white — 3.74:1, under the gate. */
+
+.cc-card {
+  flex: none;
+  background: var(--deck);
+  padding: 10px 12px 11px;
+}
+
+.cc-card-tag {
+  margin: 0 0 5px;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--signal) 85%, var(--text));
+}
+
+.cc-card[data-kind="why"] .cc-card-tag {
+  color: color-mix(in oklab, var(--violet) 85%, var(--text));
+}
+
+.cc-card-title {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  color: var(--text);
+}
+
+.cc-card-sub {
+  margin: 3px 0 0;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--slate);
+}
+
+.cc-card-rows {
+  margin-top: 8px;
+}
+
+.cc-card-row {
+  display: grid;
+  grid-template-columns: minmax(0, 88px) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 3px 0;
+  font-size: 10px;
+  line-height: 1.4;
+  border-bottom: 1px solid color-mix(in oklch, var(--rule) 55%, transparent);
+}
+
+.cc-card-row:last-child {
+  border-bottom: 0;
+}
+
+.cc-card-key {
+  color: var(--slate);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cc-card-val {
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+/* the meta rows — method, samples, gaps — and the not-measured foot are the
+   card's own hedging, so they read one step quieter than the readings */
+.cc-card-row[data-dim="true"] .cc-card-val,
+.cc-card-foot {
+  color: var(--slate);
+}
+
+.cc-card-row[data-dim="true"] {
+  border-bottom-color: transparent;
+}
+
+.cc-card-meta {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid color-mix(in oklch, var(--rule) 55%, transparent);
+}
+
+.cc-card-foot {
+  margin: 8px 0 0;
+  font-size: 9px;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.cc-card-keys {
+  margin-top: 9px;
+}
+
+.cc-card-keys .steward-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  min-height: 0;
+  padding: 0 12px;
+  border-color: var(--slate);
+}
+
+/* the local-only line · once per session, at the foot of the column */
+.cc-spine-foot {
+  flex: none;
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--rule);
+  font-size: 9px;
+  line-height: 1.5;
+  color: var(--slate);
+}
+
+.cc-spine-foot[hidden] {
+  display: none;
+}
+
+/* a card arrives from above, because a new card pushes the standing one down */
+.cc-card {
+  animation: cc-card-in 200ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+@keyframes cc-card-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- reduced motion ----
+   Instant text, static instruments, a static 24% bar, and the caret stops
+   blinking and stays on the prompt. */
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-scan.is-running i {
+    animation: none;
+    opacity: 0.85;
+  }
+
+  .cc-caret {
+    animation: none;
+  }
+
+  .cc-inst .seg span,
+  .cc-inst .cc-scope-col,
+  .cc-inst .cc-row,
+  .cc-inst .cc-more {
+    transition: none !important;
+  }
+
+  .cc-watch[data-state="amber"] .cc-dot {
+    animation: none;
+    box-shadow: 0 0 6px var(--amber);
+  }
+
+  /* the spine changes width without sliding, and a card arrives already
+     standing — the state change is the information, not the travel */
+  .cc-body {
+    transition: none;
+  }
+
+  .cc-card {
+    animation: none;
+  }
+}
+
+@media print {
+  .cold-console,
+  .steward-tabrow {
+    display: none !important;
+  }
+}
+
+/* the consent gate inside the console · same node, same words, same specs.
+   The column behaves the way the shell's does: the log and the palette step
+   aside rather than pushing the choice below the fold, and anything still too
+   tall scrolls inside the panel itself. */
+.cc-consent:has(.steward-consent-panel) {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.cc-main:has(.cc-consent .steward-consent-panel) .cc-log,
+.cc-main:has(.cc-consent .steward-consent-panel) .cc-palette {
+  display: none;
+}

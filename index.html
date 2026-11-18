@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Steward // Ground Control — the flight deck for your Mac. A private daily brief for storage changes and repeatable work."
+    />
+    <meta name="theme-color" content="#090f1c" />
+    <meta name="color-scheme" content="dark" />
+    <title>Steward // Ground Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="grid-field" aria-hidden="true"></div>
+    <div class="boot-sweep" aria-hidden="true"></div>
+
+    <a class="skip-link" href="#main-content">Skip to the daily brief</a>
+
+    <header class="app-header">
+      <div class="masthead">
+        <a class="brand" href="#today" aria-label="Steward Ground Control, daily brief home">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span class="brand-copy">
+            <span class="brand-name">Steward</span>
+            <span class="brand-edition"><span class="brand-led" aria-hidden="true"></span>//Ground Control</span>
+          </span>
+        </a>
+
+        <nav class="primary-nav" aria-label="Brief channels">
+          <a href="#today" data-nav-link aria-current="page"><span class="ch" aria-hidden="true">01</span>Today</a>
+          <a href="#storage" data-nav-link><span class="ch" aria-hidden="true">02</span>Disk</a>
+          <a href="#learn" data-nav-link><span class="ch" aria-hidden="true">03</span>Academy</a>
+          <a href="#routines" data-nav-link><span class="ch" aria-hidden="true">04</span>Routines</a>
+          <a href="#timeline" data-nav-link><span class="ch" aria-hidden="true">05</span>Timeline</a>
+          <a href="#trust" data-nav-link><span class="ch" aria-hidden="true">06</span>Trust</a>
+        </nav>
+
+        <div class="header-actions">
+          <button class="keycap theme-key" id="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to day theme">DAY</button>
+          <div class="scan-state" id="data-freshness" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span>Booting</span>
+          </div>
+          <button class="button button-secondary refresh-button" id="refresh-button" type="button" aria-label="Refresh local data view">
+            <svg aria-hidden="true" viewBox="0 0 20 20" width="16" height="16">
+              <path d="M15.4 6.2A6.5 6.5 0 1 0 16.5 10" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M12.7 5.9h3.1V2.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="sr-only" id="live-region" aria-live="polite"></div>
+
+    <main id="main-content" tabindex="-1">
+      <div id="app" aria-busy="true">
+        <section class="loading-brief" aria-label="Booting the deck">
+          <p class="boot-line" aria-hidden="true">▸ BOOTING · READING LOCAL SNAPSHOTS</p>
+          <div class="loading-line loading-line-short"></div>
+          <div class="loading-line loading-line-title"></div>
+          <div class="loading-line loading-line-copy"></div>
+          <div class="loading-columns">
+            <div class="loading-block"></div>
+            <div class="loading-block loading-block-small"></div>
+            <div class="loading-block loading-block-small"></div>
+            <div class="loading-block"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="steward-dock" id="steward" data-steward data-state="resting" data-shell="closed">
+      <div class="steward-shell" data-steward-shell aria-hidden="true" inert>
+        <div class="steward-shell-inner">
+          <!-- two panels, one at a time. Switching only flips `hidden`, so the
+               conversation log below is the same node for the whole session. -->
+          <div class="steward-tabrow">
+            <div class="steward-tabs" role="tablist" aria-label="Steward panels" data-steward-tabs>
+              <button
+                class="steward-tab"
+                type="button"
+                role="tab"
+                id="steward-tab-ask"
+                aria-controls="steward-panel-ask"
+                aria-selected="true"
+                tabindex="0"
+                data-steward-tab="ask"
+              >ASK</button>
+              <button
+                class="steward-tab"
+                type="button"
+                role="tab"
+                id="steward-tab-reclaim"
+                aria-controls="steward-panel-reclaim"
+                aria-selected="false"
+                tabindex="-1"
+                data-steward-tab="reclaim"
+              >RECLAIM</button>
+            </div>
+            <!-- tier 4 · the door to the cold console. Hidden below 700px: the
+                 rail never collapses, so the console is simply not available
+                 at a width that cannot hold it. -->
+            <button
+              class="steward-key steward-expand"
+              type="button"
+              data-console-open
+              aria-label="Expand into the steward console"
+            ><span>EXPAND</span></button>
+          </div>
+
+          <div
+            class="steward-tabpanel"
+            role="tabpanel"
+            id="steward-panel-ask"
+            aria-labelledby="steward-tab-ask"
+            data-steward-panel="ask"
+          >
+            <div class="steward-convo" data-steward-convo>
+              <div class="steward-convo-log" data-steward-log></div>
+              <!-- the empty state: three dim lines of real readings, replaced by
+                   the first turn and never shown again this session -->
+              <div class="steward-preroll" data-steward-preroll aria-hidden="true" hidden></div>
+              <div class="steward-consent" data-steward-consent hidden></div>
+              <!-- code-owned shortcuts, never model-generated: at most two -->
+              <div class="steward-suggest" data-steward-suggest hidden></div>
+              <form class="steward-prompt" data-steward-prompt novalidate>
+                <span class="steward-prompt-mark" aria-hidden="true">▸</span>
+                <!-- the mode chip and its picker stay hidden until the server
+                     says it can offer more than local — an older server keeps
+                     the deck exactly as it was -->
+                <div class="steward-mode" data-steward-modes hidden>
+                  <button
+                    class="steward-key steward-mode-chip"
+                    type="button"
+                    data-steward-mode-chip
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-label="assistant mode"
+                  ><span data-steward-mode-chip-label>LOCAL</span></button>
+                  <div class="steward-mode-pop" data-steward-mode-pop hidden>
+                    <div class="steward-mode-keys" role="radiogroup" aria-label="assistant mode" data-steward-mode-keys></div>
+                  </div>
+                </div>
+                <label class="sr-only" for="steward-ask-input">Ask Steward</label>
+                <input
+                  class="steward-prompt-input"
+                  id="steward-ask-input"
+                  data-steward-input
+                  type="text"
+                  maxlength="500"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  autocorrect="off"
+                  spellcheck="false"
+                  placeholder="ask about the brief"
+                />
+                <button class="steward-key steward-ask-key" type="submit" data-steward-ask aria-label="Ask Steward"><span>ASK</span></button>
+              </form>
+              <!-- one line: the change since the last reading and how far the
+                   history has come. The long trend sentence lives in CH01. -->
+              <p class="steward-status" data-steward-status hidden></p>
+            </div>
+          </div>
+
+          <div
+            class="steward-tabpanel"
+            role="tabpanel"
+            id="steward-panel-reclaim"
+            aria-labelledby="steward-tab-reclaim"
+            data-steward-panel="reclaim"
+            hidden
+          >
+            <!-- re-rendered on every refresh -->
+            <div data-steward-shell-body></div>
+          </div>
+        </div>
+      </div>
+      <div class="steward-row">
+        <p class="steward-line" data-steward-line aria-hidden="true" hidden></p>
+        <button class="steward-badge" type="button" data-steward-badge aria-label="Steward — status and quick reclaim panel" aria-haspopup="true" aria-expanded="false">
+          <span class="steward-body" aria-hidden="true">
+            <span class="steward-cells">
+              <i data-steward-cell></i><i data-steward-cell></i><i data-steward-cell></i><i data-steward-cell></i>
+              <i data-steward-cell></i><i data-steward-cell></i><i data-steward-cell></i><i data-steward-cell></i>
+              <i data-steward-cell></i><i data-steward-cell></i><i data-steward-cell></i><i data-steward-cell></i>
+              <i data-steward-cell></i><i data-steward-cell></i><i data-steward-cell></i><i data-steward-cell></i>
+            </span>
+            <span class="steward-face" data-steward-face>
+              <span class="steward-eye"></span>
+              <span class="steward-eye"></span>
+            </span>
+            <span class="steward-mouth"></span>
+            <span class="steward-scan"></span>
+          </span>
+          <span class="steward-z" aria-hidden="true">z</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- tier 4 · the cold console (kit "Terminal Spaces v2", phases 1–2).
+         A full-viewport surface in the deck's own material. It hides the page
+         rather than destroying it: the dashboard is still mounted underneath,
+         and `esc` hands the page straight back. -->
+    <div
+      class="cold-console"
+      id="cold-console"
+      data-console
+      role="dialog"
+      aria-modal="true"
+      aria-label="Steward console"
+      data-phase="idle"
+      hidden
+      inert
+    >
+      <header class="cc-head">
+        <p class="cc-title" data-cc-title>steward console</p>
+        <div class="cc-scan" data-cc-scan aria-hidden="true"><i></i></div>
+        <p class="cc-leave" aria-hidden="true">esc to leave</p>
+      </header>
+
+      <div class="cc-body">
+        <!-- 186px, fixed. The kit is explicit: the rail never collapses — if
+             the console is too narrow for it, the console is not available. -->
+        <aside class="cc-rail" data-cc-rail aria-label="Console rail">
+          <section class="cc-rail-block" data-cc-watching>
+            <p class="cc-rail-head">watching</p>
+            <div data-cc-watch-list></div>
+          </section>
+          <section class="cc-rail-block" data-cc-waiting>
+            <p class="cc-rail-head">
+              <span>waiting</span>
+              <span class="cc-rail-count" data-cc-waiting-count></span>
+            </p>
+            <div data-cc-waiting-list></div>
+          </section>
+          <div class="cc-him">
+            <span class="cc-face" data-cc-face data-mood="calm" aria-hidden="true">
+              <span class="cc-eye"></span>
+              <span class="cc-eye"></span>
+              <span class="cc-mouth"></span>
+            </span>
+            <span class="cc-mood" data-cc-mood aria-hidden="true">calm</span>
+          </div>
+        </aside>
+
+        <div class="cc-main">
+          <div class="cc-log" data-cc-log tabindex="-1"></div>
+          <!-- the consent panel is not rebuilt here: the shell's own node is
+               moved into this slot while the console is open, so the words,
+               the packet preview and the storage keys are the same ones. -->
+          <div class="cc-consent" data-cc-consent></div>
+          <div class="cc-palette" data-cc-palette role="listbox" aria-label="Command palette" hidden></div>
+          <form class="cc-prompt" data-cc-prompt novalidate>
+            <span class="cc-prompt-mark" aria-hidden="true">▸</span>
+            <span class="cc-field">
+              <label class="sr-only" for="cc-input">Console command</label>
+              <input
+                class="cc-input"
+                id="cc-input"
+                data-cc-input
+                type="text"
+                maxlength="500"
+                autocomplete="off"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false"
+                aria-autocomplete="list"
+                aria-expanded="false"
+              />
+              <span class="cc-ghost" data-cc-ghost aria-hidden="true"></span>
+              <span class="cc-caret" data-cc-prompt-caret aria-hidden="true"></span>
+            </span>
+          </form>
+        </div>
+
+        <!-- the evidence spine · 30px closed, 262px open. It opens for exactly
+             two gestures — a SHOW ME key or /why — and never on hover, never
+             because an answer looked important. Closed it is a wordmark and
+             nothing else, so it is hidden from the tree; open it carries a
+             close control, which is why aria-hidden is toggled rather than
+             pinned. -->
+        <aside class="cc-spine" data-cc-spine aria-label="Evidence spine" aria-hidden="true">
+          <p class="cc-spine-word" data-cc-spine-word aria-hidden="true"><span>spine</span></p>
+          <div class="cc-spine-pane" data-cc-spine-pane hidden>
+            <header class="cc-spine-head">
+              <p class="cc-spine-title">evidence</p>
+              <button
+                class="cc-spine-close"
+                data-cc-spine-close
+                type="button"
+                aria-label="Collapse the evidence spine"
+              >×</button>
+            </header>
+            <div class="cc-spine-stack" data-cc-spine-stack></div>
+            <p class="cc-spine-foot" data-cc-spine-foot hidden></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <footer class="app-footer">
+      <p><strong>Steward observes first</strong> · cleanup always waits for you</p>
+      <span class="observe-seal" aria-hidden="true">■ OBSERVE-ONLY</span>
+      <a href="#trust">Privacy &amp; coverage</a>
+    </footer>
+
+    <noscript>
+      <div class="noscript-message">
+        Steward needs JavaScript to turn its local scan files into a daily brief.
+      </div>
+    </noscript>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

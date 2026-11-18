@@ -1,0 +1,17 @@
+{
+  "name": "steward-local",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "cp -n demo/data/*.json public/data/ || true",
+    "collect": "node scripts/collect-storage.mjs",
+    "collect:safe": "node scripts/collect-safe.mjs",
+    "cleanup:safe": "node scripts/cleanup-safe.mjs",
+    "dev": "node scripts/dev-server.mjs",
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate-data.mjs",
+    "test": "npm run demo && npm run validate && npm run build && node --test 'test/*.test.mjs'"
+  },
+  "license": "MIT"
+}
